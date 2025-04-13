@@ -39,7 +39,7 @@ WRITE               "write"
 IF                  "if"
 ELSE                "else"
 CTE_INT             {OP_RES}?{DIGITO}+
-CTE_FLOAT           {OP_RES}?{DIGITO}+{PUNTO}{DIGITO}+
+CTE_FLOAT           {OP_RES}?(({DIGITO}*{PUNTO}{DIGITO}+)|({DIGITO}+{PUNTO}{DIGITO}*))
 CTE_STRING          {COM}{DIGITO|LETRA}*{COM}
 
 
@@ -66,9 +66,24 @@ CTE_STRING          {COM}{DIGITO|LETRA}*{COM}
 {WRITE}             {printf("\nwrite: %s\n", yytext);}
 {IF}                {printf("\nif: %s\n", yytext);}
 {ELSE}              {printf("\nelse: %s\n", yytext);}
-{CTE_INT}           {(sizeof(CTE_INT) <= 16) ? (printf("\ncte_int: %s\n", yytext)):(print("Error: cant de bytes superadas"));}
-{CTE_FLOAT}         {(sizeof(CTE_FLOAT) <= 32) ? (printf("\ncte_float: %s\n", yytext)):(print("Error: cant de bytes superadas"));}
-{CTE_STRING}        {(strlen(CTE_STRING) <= 50) ? (printf("\ncte_string: %s\n", yytext)):(print("Error: tam_max de cadena superado"));}
+{CTE_INT}           {
+                        if (strlen(yytext) <= 16)
+                            printf("\ncte_int: %s\n", yytext);
+                        else
+                            printf("Error: cant de bytes superadas\n");
+                    }
+{CTE_FLOAT}         {
+                        if (strlen(yytext) <= 32)
+                            printf("\ncte_float: %s\n", yytext);
+                        else
+                            printf("Error: cant de bytes superadas\n");
+                    }
+{CTE_STRING}        {
+                        if (strlen(yytext) <= 50)
+                            printf("\ncte_string: %s\n", yytext);
+                        else
+                            printf("Error: tam_max de cadena superado\n");
+                    }
 
 
 "\n"      		
