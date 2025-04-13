@@ -15,30 +15,40 @@ int yyerror(void);
 %option noyywrap  
 %option yylineno
 
-DIGITO			[0-9]
-LETRA			[a-zA-Z]
 
-CTE		        {DIGITO}+
-ID			{LETRA}({LETRA}|{DIGITO})*
-OP_AS   		":""="
+OP_AS   		    ":="
+
 OP_SUM		        "+"
-OP_MUL                  "*"
+OP_MUL              "*"
 OP_RES		        "-"
-OP_DIV                  "/"
-PA			"("
-PC			")"
+OP_DIV              "/"
+PA			        "("
+PC			        ")"
+WHILE               "while"
+MT                  ">"
+LT                  "<"
+CBO                 "{"
+CBC                 "}"
+OPEN_COMM           "#+"
+CLOSE_COMM          "+#"
 
 %%
 
-{CTE}			{printf("\nConstante: %s\n", yytext);return CTE;}
-{ID}			{printf("\nIdentificador: %s\n", yytext);return ID;}
-{OP_SUM}		{printf("\nSuma: %s\n", yytext);return OP_SUM;}
-{OP_AS}			{printf("\nAsignacion: %s\n", yytext);return OP_AS;}
-{OP_MUL}		{printf("\nMultiplicacion: %s\n", yytext);return OP_MUL;}
-{OP_RES}		{printf("\nResta: %s\n", yytext);return OP_RES;}
-{OP_DIV}		{printf("\nDivision: %s\n", yytext);return OP_DIV;}
-{PA}			{printf("\nParAbre: %s\n", yytext);return PA;}
-{PC}			{printf("\nParCierra: %s\n", yytext);return PC;}
+{OP_SUM}            {printf("\nop_suma: %s\n", yytext);}
+{OP_MUL}            {printf("\nop_mul: %s\n", yytext);}
+{OP_RES}            {printf("\nop_res: %s\n", yytext);}
+{OP_DIV}            {printf("\nop_div: %s\n", yytext);}
+{PA}                {printf("\nparentesis abre: %s\n", yytext);}
+{PC}                {printf("\nparentesis cierra: %s\n", yytext);}
+{WHILE}             {printf("\nwhile: %s\n", yytext);}
+{MT}                {printf("\nmore than: %s\n", yytext);}
+{LT}                {printf("\nless than: %s\n", yytext);}
+{CBO}               {printf("\nllave abre: %s\n", yytext);}
+{CBC}               {printf("\nllave cierra: %s\n", yytext);}
+{OPEN_COMM}         {printf("\nopen comment: %s\n", yytext);}
+{CLOSE_COMM}        {printf("\nclose comment: %s\n", yytext);}
+
+
 "\n"      		
 "\t"
 "\n\t"
@@ -47,3 +57,26 @@ PC			")"
 .			 { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
 
 %%
+
+
+int main(int argc, char *argv[])
+{
+    if((yyin = fopen(argv[1], "rt"))==NULL)
+    {
+        printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
+       
+    }
+    else
+    { 
+        
+        yylex();
+        
+    }
+	fclose(yyin);
+        return 0;
+}
+int yyerror(void)
+     {
+       printf("Error Sintactico\n");
+	 exit (1);
+     }
