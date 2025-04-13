@@ -32,8 +32,8 @@ CBO                 "{"
 CBC                 "}"
 OPEN_COMM           "#+"
 CLOSE_COMM          "+#"
-PUNTO_DECIMAL       "."
-COM                 ""'
+PUNTO               "."
+COM                 "\""
 READ                "read"
 WRITE               "write"
 IF                  "if"
@@ -60,7 +60,7 @@ CTE_STRING          {COM}{DIGITO|LETRA}*{COM}
 {CBC}               {printf("\nllave cierra: %s\n", yytext);}
 {OPEN_COMM}         {printf("\nopen comment: %s\n", yytext);}
 {CLOSE_COMM}        {printf("\nclose comment: %s\n", yytext);}
-{PUNTO_DECIMAL}     {printf("\npunto_decimal comment: %s\n", yytext);}
+{PUNTO}             {printf("\npunto comment: %s\n", yytext);}
 {COM}               {printf("\ncomillas: %s\n", yytext);}
 {READ}              {printf("\nread: %s\n", yytext);}
 {WRITE}             {printf("\nwrite: %s\n", yytext);}
