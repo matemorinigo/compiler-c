@@ -26,6 +26,15 @@ FILE  *yyin;
 %token OP_DIV
 %token PA
 %token PC
+%token PUNTO
+%token COM
+%token READ
+%token WRITE
+%token IF
+%token ELSE 
+%token CTE_INT
+%token CTE_FLOAT
+%token CTE_STRING
 
 %%
 input:

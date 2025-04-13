@@ -11,3 +11,12 @@ while
 <
 +#
 #+
+read
+write
+if
+else
+.
+"
+12
+15.9
+"string"
