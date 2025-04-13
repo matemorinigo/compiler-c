@@ -66,9 +66,9 @@ CTE_STRING          {COM}{DIGITO|LETRA}*{COM}
 {WRITE}             {printf("\nwrite: %s\n", yytext);}
 {IF}                {printf("\nif: %s\n", yytext);}
 {ELSE}              {printf("\nelse: %s\n", yytext);}
-{CTE_INT}           {(sizeof(CTE_INT) <= 16) ? (printf("\ncte_int: %s\n", yytext)):(print("Error: cant de bytes superadas));}
-{CTE_FLOAT}         {(sizeof(CTE_FLOAT) <= 32) ? (printf("\ncte_float: %s\n", yytext)):(print("Error: cant de bytes superadas));}
-{CTE_STRING}        {strlen(CTE_STRING) <= 50 ? (printf("\ncte_string: %s\n", yytext)):(print("Error: tam_max de cadena superado));}
+{CTE_INT}           {(sizeof(CTE_INT) <= 16) ? (printf("\ncte_int: %s\n", yytext)):(print("Error: cant de bytes superadas"));}
+{CTE_FLOAT}         {(sizeof(CTE_FLOAT) <= 32) ? (printf("\ncte_float: %s\n", yytext)):(print("Error: cant de bytes superadas"));}
+{CTE_STRING}        {strlen(CTE_STRING) <= 50 ? (printf("\ncte_string: %s\n", yytext)):(print("Error: tam_max de cadena superado"));}
 
 
 "\n"      		
