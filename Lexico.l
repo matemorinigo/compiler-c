@@ -13,7 +13,7 @@ int yyerror(void);
 %}
 
 %option noyywrap  
-%option yylineno 
+%option yylineno
 
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
@@ -46,4 +46,4 @@ PC			")"
 "\r\n"
 .			 { printf( "ERROR LEXICO : Caracter no reconocido: %s\n", yytext ); exit (0);}
 
-
+%%
