@@ -118,7 +118,7 @@ CTE_STRING          {COM}({DIGITO}|{LETRA})*{COM}
 {DOS_PUNTOS}        {printf("\ndos puntos:%s\n", yytext);}
 {COMA}              {printf("\ncoma:%s\n", yytext);}
 
-({CTE_INT}|{CTE_FLOAT}|{CTE_STRING}) {printf("\nconstante:%s\n", yytext);}{CTE_INT}           {
+{CTE_INT}           {
                         long value = strtol(yytext, NULL, 10);
                         if(value >= INT16_MIN && value <= INT16_MAX)
                             printf("\ncte_int (16 bits): %ld\n", value);
@@ -139,7 +139,6 @@ CTE_STRING          {COM}({DIGITO}|{LETRA})*{COM}
                         else
                             printf("Error: tam_max de cadena superado\n");
                     }
-
 
 "\n"      		
 "\t"
