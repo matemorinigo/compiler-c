@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <float.h>
 
 #include "y.tab.h"
 FILE  *yyin;
@@ -67,16 +69,19 @@ CTE_STRING          {COM}({DIGITO}|{LETRA})*{COM}
 {IF}                {printf("\nif: %s\n", yytext);}
 {ELSE}              {printf("\nelse: %s\n", yytext);}
 {CTE_INT}           {
-                        if (strlen(yytext) <= 16)
-                            printf("\ncte_int: %s\n", yytext);
+                        long value = strtol(yytext, NULL, 10);
+                        if(value >= INT16_MIN && value <= INT16_MAX)
+                            printf("\ncte_int (16 bits): %ld\n", value);
                         else
-                            printf("Error: cant de bytes superadas\n");
+                            printf("Error: cte_int fuera del rango de 16 bits: %ld\n", value);
+
                     }
 {CTE_FLOAT}         {
-                        if (strlen(yytext) <= 32)
-                            printf("\ncte_float: %s\n", yytext);
+                        float value = strtof(yytext, NULL);
+                        if (value <= FLT_MAX && value >= -FLT_MAX)
+                            printf("\ncte_float (32 bits): %f\n", value);
                         else
-                            printf("Error: cant de bytes superadas\n");
+                            printf("Error: cte_float fuera del rango de 32 bits (float): %s\n", yytext);
                     }
 {CTE_STRING}        {
                         if (strlen(yytext) <= 50)
