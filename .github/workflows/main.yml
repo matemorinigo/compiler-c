@@ -1,0 +1,29 @@
+name: Run tests on merge
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  run-bash-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Make script executable
+        run: chmod +x ./run_w_steroids.sh # Cambiá esto si el path es distinto
+
+      - name: Run Assignments test
+        run: ./run_w_steroids.sh "assignments.txt"
+
+      - name: Run logical operators test
+        run: ./run_w_steroids.sh "logical_operators.txt"
+        
+      - name: Run prueba.txt
+        run: ./run_w_steroids.sh "prueba.txt"
+
+      - name: Run variable declaration test
+        run: ./run_w_steroids.sh "variable_declaration.txt"
