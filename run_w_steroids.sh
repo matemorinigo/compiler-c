@@ -1,4 +1,4 @@
-args=$(getopt -o d:a:ph --l help,directorio:,archivo:,pantalla -- "$@" 2> /dev/null)
+args=$(getopt -o f:h --l help,filename: -- "$@" 2> /dev/null)
 if [ "$?" != "0" ]
 then
   echo "opciones incorrectas"
@@ -31,9 +31,9 @@ done
 flex Lexico.l
 bison -dyv Sintactico.y
 gcc lex.yy.c y.tab.c -o compiler -lfl
-./compiler "$filename"
+./compiler tests/"$filename"
 rm lex.yy.c
 rm y.tab.c
 rm y.output
 rm y.tab.h
-rm compilador
+rm compiler
