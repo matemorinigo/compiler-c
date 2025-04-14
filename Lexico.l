@@ -40,8 +40,6 @@ NOT                 "NOT"
 /*Parentesis, llaves y elementos que encierren cosas*/
 PA			        "("
 PC			        ")"
-MT                  ">"
-LT                  "<"
 CBO                 "{"
 CBC                 "}"
 OPEN_COMM           "#+"
@@ -94,8 +92,6 @@ CTE_BOOL            {BOOL}
 
 {PA}                {printf("\nparentesis abre: %s\n", yytext);}
 {PC}                {printf("\nparentesis cierra: %s\n", yytext);}
-{MT}                {printf("\nmore than: %s\n", yytext);}
-{LT}                {printf("\nless than: %s\n", yytext);}
 {CBO}               {printf("\nllave abre: %s\n", yytext);}
 {CBC}               {printf("\nllave cierra: %s\n", yytext);}
 {OPEN_COMM}         {printf("\nopen comment: %s\n", yytext);}
