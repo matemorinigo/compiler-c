@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <float.h>
+
 #include "y.tab.h"
 
 int yyerror(void);
@@ -115,7 +118,28 @@ CTE_STRING          {COM}({DIGITO}|{LETRA})*{COM}
 {DOS_PUNTOS}        {printf("\ndos puntos:%s\n", yytext);}
 {COMA}              {printf("\ncoma:%s\n", yytext);}
 
-({CTE_INT}|{CTE_FLOAT}|{CTE_STRING}) {printf("\nconstante:%s\n", yytext);}
+({CTE_INT}|{CTE_FLOAT}|{CTE_STRING}) {printf("\nconstante:%s\n", yytext);}{CTE_INT}           {
+                        long value = strtol(yytext, NULL, 10);
+                        if(value >= INT16_MIN && value <= INT16_MAX)
+                            printf("\ncte_int (16 bits): %ld\n", value);
+                        else
+                            printf("Error: cte_int fuera del rango de 16 bits: %ld\n", value);
+
+                    }
+{CTE_FLOAT}         {
+                        float value = strtof(yytext, NULL);
+                        if (value <= FLT_MAX && value >= -FLT_MAX)
+                            printf("\ncte_float (32 bits): %f\n", value);
+                        else
+                            printf("Error: cte_float fuera del rango de 32 bits (float): %s\n", yytext);
+                    }
+{CTE_STRING}        {
+                        if (strlen(yytext) <= 50)
+                            printf("\ncte_string: %s\n", yytext);
+                        else
+                            printf("Error: tam_max de cadena superado\n");
+                    }
+
 
 "\n"      		
 "\t"
