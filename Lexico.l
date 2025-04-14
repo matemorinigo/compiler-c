@@ -17,6 +17,7 @@ int yyerror(void);
 /*Caracteres alfanumericos*/
 DIGITO              [0-9]
 LETRA               [a-zA-Z]
+BOOL                [0-1]
 
 /*Operadores*/
 OP_ASIG   		    ":="
@@ -53,6 +54,7 @@ IF                  "if"
 ELSE                "else"
 INIT                "init"
 WHILE               "while"
+SLICE_AND_CONCAT    "sliceAndConcat"
 TIPO_DATO           ("Float"|"Int"|"String")
 
 
@@ -67,14 +69,11 @@ COMA                ","
 CTE_INT             {OP_RES}?{DIGITO}+
 CTE_FLOAT           {OP_RES}?(({DIGITO}*{PUNTO}{DIGITO}+)|({DIGITO}+{PUNTO}{DIGITO}*))
 CTE_STRING          {COM}({DIGITO}|{LETRA})*{COM}
+CTE_BOOL            {BOOL}
 
 
        
 %%
-{DIGITO}            {printf("\ndigito: %s\n", yytext);}
-{LETRA}             {printf("\nletra: %s\n", yytext);}
-
-
 {OP_ASIG}
 {OP_SUM}            {printf("\nop_suma: %s\n", yytext);}
 {OP_MUL}            {printf("\nop_mul: %s\n", yytext);}
@@ -106,6 +105,7 @@ CTE_STRING          {COM}({DIGITO}|{LETRA})*{COM}
 {WHILE}             {printf("\nwhile: %s\n", yytext);}
 {READ}              {printf("\nread: %s\n", yytext);}
 {WRITE}             {printf("\nwrite: %s\n", yytext);}
+{SLICE_AND_CONCAT}  {printf("\nsliceAndConcat: %s\n", yytext);}
 {IF}                {printf("\nif: %s\n", yytext);}
 {ELSE}              {printf("\nelse: %s\n", yytext);}
 {INIT}              {printf("\ninit: %s\n", yytext);}
@@ -139,6 +139,7 @@ CTE_STRING          {COM}({DIGITO}|{LETRA})*{COM}
                         else
                             printf("Error: tam_max de cadena superado\n");
                     }
+{CTE_BOOL}          {printf("\ncte_bool:%s\n", yytext);}
 
 "\n"      		
 "\t"
