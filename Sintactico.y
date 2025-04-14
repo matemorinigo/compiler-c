@@ -3,12 +3,12 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include "y.tab.h"
-int yystopparser=0;
-FILE  *yyin;
 
-  int yyerror();
-  int yylex();
+int yystopparser=0;
+
+
+int yyerror();
+int yylex();
 
 
 %}

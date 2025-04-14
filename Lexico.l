@@ -2,12 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "y.tab.h"
-FILE  *yyin;
-int yylval;
-char *yyltext;
-
 
 int yyerror(void);
 
@@ -38,10 +33,12 @@ READ                "read"
 WRITE               "write"
 IF                  "if"
 ELSE                "else"
+OP_ASIG             ":="
 CTE_INT             {OP_RES}?{DIGITO}+
 CTE_FLOAT           {OP_RES}?(({DIGITO}*{PUNTO}{DIGITO}+)|({DIGITO}+{PUNTO}{DIGITO}*))
-CTE_STRING          {COM}{DIGITO|LETRA}*{COM}
-
+CTE_STRING          {COM}({DIGITO}|{LETRA})*{COM}
+ID                  {LETRA}+({DIGITO}|{LETRA})*
+       
 
 
 %%
@@ -66,24 +63,6 @@ CTE_STRING          {COM}{DIGITO|LETRA}*{COM}
 {WRITE}             {printf("\nwrite: %s\n", yytext);}
 {IF}                {printf("\nif: %s\n", yytext);}
 {ELSE}              {printf("\nelse: %s\n", yytext);}
-{CTE_INT}           {
-                        if (strlen(yytext) <= 16)
-                            printf("\ncte_int: %s\n", yytext);
-                        else
-                            printf("Error: cant de bytes superadas\n");
-                    }
-{CTE_FLOAT}         {
-                        if (strlen(yytext) <= 32)
-                            printf("\ncte_float: %s\n", yytext);
-                        else
-                            printf("Error: cant de bytes superadas\n");
-                    }
-{CTE_STRING}        {
-                        if (strlen(yytext) <= 50)
-                            printf("\ncte_string: %s\n", yytext);
-                        else
-                            printf("Error: tam_max de cadena superado\n");
-                    }
 
 
 "\n"      		
@@ -101,19 +80,16 @@ int main(int argc, char *argv[])
     if((yyin = fopen(argv[1], "rt"))==NULL)
     {
         printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
-       
+        return 1;
     }
-    else
-    { 
-        
-        yylex();
-        
-    }
+
+    yylex(); 
 	fclose(yyin);
-        return 0;
+    return 0;
 }
+
 int yyerror(void)
-     {
-       printf("Error Sintactico\n");
-	 exit (1);
-     }
+{
+    printf("Error Sintactico\n");
+	exit (1);
+}
