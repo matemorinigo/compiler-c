@@ -30,11 +30,13 @@ int yylex();
 %token COM
 %token READ
 %token WRITE
+%token SLICE_AND_CONCAT
 %token IF
 %token ELSE 
 %token CTE_INT
 %token CTE_FLOAT
 %token CTE_STRING
+%token CTE_BOOL
 
 %%
 input:
