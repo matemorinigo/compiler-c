@@ -22,10 +22,10 @@ jobs:
         run: chmod +x ./run_w_steroids.sh 
 
       - name: Run Assignments test
-        run: ./run_w_steroids.sh "assignments.txt"
+        run: ./run_w_steroids.sh -f "assignments.txt"
 
       - name: Run logical operators test
-        run: ./run_w_steroids.sh "logical_operators.txt"
+        run: ./run_w_steroids.sh -f "logical_operators.txt"
 
       - name: Run variable declaration test
-        run: ./run_w_steroids.sh "variable_declaration.txt"
+        run: ./run_w_steroids.sh -f "variable_declaration.txt"
