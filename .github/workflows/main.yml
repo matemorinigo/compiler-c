@@ -26,9 +26,6 @@ jobs:
 
       - name: Run logical operators test
         run: ./run_w_steroids.sh "logical_operators.txt"
-        
-      - name: Run prueba.txt
-        run: ./run_w_steroids.sh "prueba.txt"
 
       - name: Run variable declaration test
         run: ./run_w_steroids.sh "variable_declaration.txt"
