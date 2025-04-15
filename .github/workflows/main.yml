@@ -13,6 +13,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install dependencies (flex, bison, gcc)
+        run: |
+          sudo apt update
+          sudo apt install -y flex bison gcc
+
       - name: Make script executable
         run: chmod +x ./run_w_steroids.sh # Cambiá esto si el path es distinto
 
