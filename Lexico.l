@@ -72,52 +72,52 @@ CTE_BOOL            {BOOL}
 
        
 %%
-{OP_ASIG}
-{OP_SUM}            {printf("\nop_suma: %s\n", yytext);}
-{OP_MUL}            {printf("\nop_mul: %s\n", yytext);}
-{OP_RES}            {printf("\nop_res: %s\n", yytext);}
-{OP_DIV}            {printf("\nop_div: %s\n", yytext);}
+{OP_ASIG}           {return OP_ASIG}
+{OP_SUM}            {return OP_SUM}
+{OP_MUL}            {return OP_MUL}
+{OP_RES}            {return OP_RES}
+{OP_DIV}            {return OP_DIV}
 
 
-{MAYOR}             {printf("\nmayor: %s\n", yytext);}
-{MAYOR_IGUAL}       {printf("\nmayor igual: %s\n", yytext);}
-{MENOR}             {printf("\nmenor: %s\n", yytext);}
-{MENOR_IGUAL}       {printf("\nmenor igual: %s\n", yytext);}
+{MAYOR}             {return MAYOR}
+{MAYOR_IGUAL}       {return MAYOR_IGUAL}
+{MENOR}             {return MENOR}
+{MENOR_IGUAL}       {return MENOR_IGUAL}
 
 
-{AND}               {printf("\nand: %s\n", yytext);}
-{OR}                {printf("\nor: %s\n", yytext);}
-{NOT}               {printf("\nnot: %s\n", yytext);}
+{AND}               {return AND}
+{OR}                {return OR}
+{NOT}               {return NOT}
 
 
-{PA}                {printf("\nparentesis abre: %s\n", yytext);}
-{PC}                {printf("\nparentesis cierra: %s\n", yytext);}
-{CBO}               {printf("\nllave abre: %s\n", yytext);}
-{CBC}               {printf("\nllave cierra: %s\n", yytext);}
-{OPEN_COMM}         {printf("\nopen comment: %s\n", yytext);}
-{CLOSE_COMM}        {printf("\nclose comment: %s\n", yytext);}
+{PA}                {return PA}
+{PC}                {return PC}
+{CBO}               {return CBO}
+{CBC}               {return CBC}
+{OPEN_COMM}         {return OPEN_COMM}
+{CLOSE_COMM}        {return CLOSE_COMM}
 
 
-{WHILE}             {printf("\nwhile: %s\n", yytext);}
-{READ}              {printf("\nread: %s\n", yytext);}
-{WRITE}             {printf("\nwrite: %s\n", yytext);}
-{SLICE_AND_CONCAT}  {printf("\nsliceAndConcat: %s\n", yytext);}
-{IF}                {printf("\nif: %s\n", yytext);}
-{ELSE}              {printf("\nelse: %s\n", yytext);}
-{INIT}              {printf("\ninit: %s\n", yytext);}
-{TIPO_DATO}         {printf("\ntipo dato: %s\n", yytext);}
+{WHILE}             {return WHILE}
+{READ}              {return READ}
+{WRITE}             {return WRITE}
+{SLICE_AND_CONCAT}  {return SLICE_AND_CONCAT}
+{IF}                {return IF}
+{ELSE}              {return ELSE}
+{INIT}              {return INIT}
+{TIPO_DATO}         {return TIPO_DATO}
 
-{ID}                {printf("\nid:%s\n", yytext);}
+{ID}                {return ID}
 
-{PUNTO}             {printf("\npunto comment: %s\n", yytext);}
-{COM}               {printf("\ncomillas: %s\n", yytext);}
-{DOS_PUNTOS}        {printf("\ndos puntos:%s\n", yytext);}
-{COMA}              {printf("\ncoma:%s\n", yytext);}
+{PUNTO}             {return PUNTO}
+{COM}               {return COM}
+{DOS_PUNTOS}        {return DOS_PUNTOS}
+{COMA}              {return COMA}
 
 {CTE_INT}           {
                         long value = strtol(yytext, NULL, 10);
                         if(value >= INT16_MIN && value <= INT16_MAX)
-                            printf("\ncte_int (16 bits): %ld\n", value);
+                            return CTE_INT
                         else
                             printf("Error: cte_int fuera del rango de 16 bits: %ld\n", value);
 
@@ -125,17 +125,17 @@ CTE_BOOL            {BOOL}
 {CTE_FLOAT}         {
                         float value = strtof(yytext, NULL);
                         if (value <= FLT_MAX && value >= -FLT_MAX)
-                            printf("\ncte_float (32 bits): %f\n", value);
+                             return CTE_FLOAT
                         else
                             printf("Error: cte_float fuera del rango de 32 bits (float): %s\n", yytext);
                     }
 {CTE_STRING}        {
                         if (strlen(yytext) <= 50)
-                            printf("\ncte_string: %s\n", yytext);
+                            return CTE_STRING
                         else
                             printf("Error: tam_max de cadena superado\n");
                     }
-{CTE_BOOL}          {printf("\ncte_bool:%s\n", yytext);}
+{CTE_BOOL}          {return CTE_BOOL}
 
 "\n"      		
 "\t"
@@ -146,22 +146,3 @@ CTE_BOOL            {BOOL}
 
 %%
 
-
-int main(int argc, char *argv[])
-{
-    if((yyin = fopen(argv[1], "rt"))==NULL)
-    {
-        printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
-        return 1;
-    }
-
-    yylex(); 
-	fclose(yyin);
-    return 0;
-}
-
-int yyerror(void)
-{
-    printf("Error Sintactico\n");
-	exit (1);
-}
