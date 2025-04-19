@@ -1,0 +1,6 @@
+<programa> -> <bloque>
+
+<bloque> -> <sentencia>
+<bloque> -> <bloque> <sentencia>
+
+<sentencia> ->

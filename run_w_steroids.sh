@@ -29,7 +29,7 @@ do
 done
 
 flex Lexico.l
-bison -dyv Sintactico.y
+bison -dyv Sintactico.y -Wcounterexamples
 gcc lex.yy.c y.tab.c -o compiler -lfl
 ./compiler tests/"$filename"
 rm lex.yy.c
