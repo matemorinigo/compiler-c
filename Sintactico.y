@@ -3,13 +3,12 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-
+int yyerror(char* e);
 int yystopparser=0;
 
-int yyerror();
 extern int yylex();
 extern int yyparser();
-extern File* yyin;
+extern FILE* yyin;
 
 
 %}
@@ -31,9 +30,9 @@ extern File* yyin;
 %token MENOR
 %token MENOR_IGUAL
 
-%token AND
-%token OR
-%token NOT
+%left AND
+%left OR
+%right NOT
 
 %token PA
 %token PC
@@ -67,7 +66,66 @@ extern File* yyin;
 
 %%
 
-program
+program:
+    sentence
+    | program sentence
+    ;
+
+sentence:
+    assignment
+    | loop
+    | selection
+    ;
+
+assignment:
+    ID OP_ASIG expression
+    ;
+
+selection:
+    IF condition CBO program CBC
+    | IF condition CBO program CBC ELSE CBO program CBC
+    ;
+
+loop:
+    WHILE condition CBO program CBC
+;
+
+condition:
+    comparison
+    | condition AND comparison
+    | condition OR comparison
+    | NOT condition
+    ;
+
+comparison:
+    expression comparator expression
+    ;
+
+comparator:
+    MAYOR
+    | MAYOR_IGUAL
+    | MENOR_IGUAL
+    | MENOR
+    ;
+
+expression:
+    expression OP_SUM term
+    | expression OP_RES term
+    | term
+    ;
+
+term:
+    term OP_MUL factor
+    | term OP_DIV factor
+    | factor
+    ;
+
+factor:
+    PA expression PC
+    | ID
+    | CTE_INT
+    | CTE_FLOAT
+    ;
 
 
 %%
@@ -82,14 +140,15 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int parserResult = yyparser();
-
+    int parserResult = yyparse();
 
 	fclose(yyin);
+
+	printf("Syntax OK \n");
     return 0;
 }
 
-int yyerror(void)
+int yyerror(char* e)
 {
     printf("Error Sintactico\n");
 	exit (1);

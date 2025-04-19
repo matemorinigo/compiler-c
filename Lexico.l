@@ -7,7 +7,7 @@
 
 #include "y.tab.h"
 
-int yyerror(void);
+
 
 %}
 
@@ -72,52 +72,52 @@ CTE_BOOL            {BOOL}
 
        
 %%
-{OP_ASIG}           {return OP_ASIG}
-{OP_SUM}            {return OP_SUM}
-{OP_MUL}            {return OP_MUL}
-{OP_RES}            {return OP_RES}
-{OP_DIV}            {return OP_DIV}
+{OP_ASIG}           {return OP_ASIG;}
+{OP_SUM}            {return OP_SUM;}
+{OP_MUL}            {return OP_MUL;}
+{OP_RES}            {return OP_RES;}
+{OP_DIV}            {return OP_DIV;}
 
 
-{MAYOR}             {return MAYOR}
-{MAYOR_IGUAL}       {return MAYOR_IGUAL}
-{MENOR}             {return MENOR}
-{MENOR_IGUAL}       {return MENOR_IGUAL}
+{MAYOR}             {return MAYOR;}
+{MAYOR_IGUAL}       {return MAYOR_IGUAL;}
+{MENOR}             {return MENOR;}
+{MENOR_IGUAL}       {return MENOR_IGUAL;}
 
 
-{AND}               {return AND}
-{OR}                {return OR}
-{NOT}               {return NOT}
+{AND}               {return AND;}
+{OR}                {return OR;}
+{NOT}               {return NOT;}
 
 
-{PA}                {return PA}
-{PC}                {return PC}
-{CBO}               {return CBO}
-{CBC}               {return CBC}
-{OPEN_COMM}         {return OPEN_COMM}
-{CLOSE_COMM}        {return CLOSE_COMM}
+{PA}                {return PA;}
+{PC}                {return PC;}
+{CBO}               {return CBO;}
+{CBC}               {return CBC;}
+{OPEN_COMM}         {return OPEN_COMM;}
+{CLOSE_COMM}        {return CLOSE_COMM;}
 
 
-{WHILE}             {return WHILE}
-{READ}              {return READ}
-{WRITE}             {return WRITE}
-{SLICE_AND_CONCAT}  {return SLICE_AND_CONCAT}
-{IF}                {return IF}
-{ELSE}              {return ELSE}
-{INIT}              {return INIT}
-{TIPO_DATO}         {return TIPO_DATO}
+{WHILE}             {return WHILE;}
+{READ}              {return READ;}
+{WRITE}             {return WRITE;}
+{SLICE_AND_CONCAT}  {return SLICE_AND_CONCAT;}
+{IF}                {return IF;}
+{ELSE}              {return ELSE;}
+{INIT}              {return INIT;}
+{TIPO_DATO}         {return TIPO_DATO;}
 
-{ID}                {return ID}
+{ID}                {return ID;}
 
-{PUNTO}             {return PUNTO}
-{COM}               {return COM}
-{DOS_PUNTOS}        {return DOS_PUNTOS}
-{COMA}              {return COMA}
+{PUNTO}             {return PUNTO;}
+{COM}               {return COM;}
+{DOS_PUNTOS}        {return DOS_PUNTOS;}
+{COMA}              {return COMA;}
 
 {CTE_INT}           {
                         long value = strtol(yytext, NULL, 10);
                         if(value >= INT16_MIN && value <= INT16_MAX)
-                            return CTE_INT
+                            return CTE_INT;
                         else
                             printf("Error: cte_int fuera del rango de 16 bits: %ld\n", value);
 
@@ -125,17 +125,17 @@ CTE_BOOL            {BOOL}
 {CTE_FLOAT}         {
                         float value = strtof(yytext, NULL);
                         if (value <= FLT_MAX && value >= -FLT_MAX)
-                             return CTE_FLOAT
+                             return CTE_FLOAT;
                         else
                             printf("Error: cte_float fuera del rango de 32 bits (float): %s\n", yytext);
                     }
 {CTE_STRING}        {
                         if (strlen(yytext) <= 50)
-                            return CTE_STRING
+                            return CTE_STRING;
                         else
                             printf("Error: tam_max de cadena superado\n");
                     }
-{CTE_BOOL}          {return CTE_BOOL}
+
 
 "\n"      		
 "\t"
