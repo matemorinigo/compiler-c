@@ -13,3 +13,6 @@ while (a > b)
     write("a es mas grande que b")
     a =: a + 1
 }
+
+sliceAndConcat(3, 6, "amarillo", "verde", 0)
+reorder([x+3, 1+1, 9-x],1,2)

@@ -107,6 +107,8 @@ sentence:
     | arithmetic_assig
     | input
     | output
+    | sliceAndConcat
+    | reorder
     ;
 
 assignment:
@@ -179,6 +181,34 @@ output:
     WRITE PA cte PC
     | WRITE PA ID PC
     ;
+
+sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
+    SLICE_AND_CONCAT PA cte_int_o_id COMA cte_int_o_id COMA cte_string_o_id COMA cte_string_o_id COMA cte_int_o_id PC 
+    ;
+
+reorder: /*El anteultimo cte/id tendria que ser un bool*/
+    REORDER PA OPEN_BRACKET lista_expresiones CLOSE_BRACKET COMA cte_int_o_id COMA cte_int_o_id PC
+    ;
+
+lista_expresiones:
+    lista_expresiones COMA expression
+    | expression
+    ;
+
+cte_int_o_id:
+    CTE_INT
+    | ID
+    ;
+
+cte_string_o_id:
+    CTE_STRING
+    | ID
+    ;
+
+/*cte_bool_o_id:
+    CTE_BOOL
+    | ID
+    ;*/
 
 %%
 
