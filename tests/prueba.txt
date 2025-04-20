@@ -1,26 +1,15 @@
-+
-while
-{
+init {
+    a, b, c : Int
 }
-(
-)
--
-*
-/
->
-<
-+#
-#+
-read
-write
-if
-else
-.
-"
-32767
-15.9
-"string"
-"str1ng"
-0
-1
-sliceAndConcat
+a := 1
+b := 1
+c := 3
+if (a > b AND c > b)
+{
+    write("a es mas grande que b y c es mas grande que b")
+}
+while (a > b)
+{
+    write("a es mas grande que b")
+    a =: a + 1
+}
