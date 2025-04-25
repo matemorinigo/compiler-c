@@ -67,6 +67,10 @@ int ponerOrdenado(tLista* pl,const void* dato,size_t tamDato,int cmp(const void*
     {
         pl = &(*pl)->siguiente;
     }
+    if(*pl && cmp((*pl)->dato,dato) == 0)
+    {
+        return 1;
+    }
 
     memcpy(nuevo->dato,dato,tamDato);
     nuevo->tamDato = tamDato;
@@ -144,11 +148,11 @@ void vaciarLista(tLista* pl)
     }
 }
 
-void recorrerLista(tLista* pl,void funcion(void*))
+void recorrerLista(tLista* pl,void funcion(void*, void*), void* param)
 {
     while(*pl)
     {
-        funcion((*pl)->dato);
+        funcion((*pl)->dato, param);
         pl = &(*pl)->siguiente;
     }
 }

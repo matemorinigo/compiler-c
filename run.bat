@@ -2,7 +2,8 @@
 flex .\src\core\Lexico.l
 bison -dyv .\src\core\Sintactico.y
 
-gcc.exe lex.yy.c y.tab.c -o compilador.exe
+gcc.exe -Isrc/utils lex.yy.c y.tab.c src/utils/symbol.c src/utils/list.c -o compilador.exe
+
 
 compilador.exe tests\prueba.txt
 
