@@ -1,5 +1,6 @@
 #ifndef LISTASIMPLEMENTEENLAZADA_H_INCLUDED
 #define LISTASIMPLEMENTEENLAZADA_H_INCLUDED
+#include <stdlib.h>
 
 typedef struct sNodo
 {
@@ -18,7 +19,7 @@ int sacarUltimo(tLista* pl,void* destino,size_t tamDato);
 int sacarPrimero(tLista* pl,void* destino,size_t tamDato);
 int sacarElemento(tLista* pl,void* destino,size_t tamDato,unsigned pos);
 void vaciarLista(tLista* pl);
-void recorrerLista(tLista* pl,void funcion(void*));
+void recorrerLista(tLista* pl,void funcion(void*, void*), void* param);
 void filtrarLista(tLista* pl,int ffiltro(const void*));
 void reducirLista(tLista* pl,void* acum,void funcion(const void*,void*));
 void ordenarListaInsercion(tLista* pl,int cmp(const void*,const void*));

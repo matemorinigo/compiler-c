@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <float.h>
+#include "symbol.h"
 
 #include "y.tab.h"
 
@@ -116,7 +117,17 @@ CTE_BOOL            {BOOL}
 {INIT}              {return INIT;}
 {TIPO_DATO}         {return TIPO_DATO;}
 
-{ID}                {return ID;}
+{ID}                {
+                        symbol sym;
+
+                        strcpy(sym.name, yytext);
+                        strcpy(sym.data_type, "");
+                        strcpy(sym.value, "");
+                        sym.length = strlen(yytext);
+                        insert_symbol(sym);
+
+                        return ID;
+                    }
 
 {PUNTO}             {return PUNTO;}
 {COM}               {return COM;}
@@ -125,24 +136,54 @@ CTE_BOOL            {BOOL}
 
 {CTE_INT}           {
                         long value = strtol(yytext, NULL, 10);
-                        if(value >= INT16_MIN && value <= INT16_MAX)
-                            return CTE_INT;
-                        else
-                            printf("Error: cte_int fuera del rango de 16 bits: %ld\n", value);
+                        if(value >= INT16_MIN && value <= INT16_MAX) {
+                            symbol sym;
 
+                            snprintf(sym.name, sizeof(sym.name), "_%s", yytext);
+                            strcpy(sym.data_type, "");
+                            strcpy(sym.value, yytext);
+                            sym.length = strlen(yytext);
+                            insert_symbol(sym);
+
+                            return CTE_INT;
+                        } else {
+                            printf("Error: cte_int fuera del rango de 16 bits: %ld\n", value);
+                        }
                     }
+
 {CTE_FLOAT}         {
                         float value = strtof(yytext, NULL);
                         if (value <= FLT_MAX && value >= -FLT_MAX)
-                             return CTE_FLOAT;
-                        else
+                        {
+                            symbol sym;
+
+                            snprintf(sym.name, sizeof(sym.name), "_%s", yytext);
+                            strcpy(sym.data_type, "");
+                            strcpy(sym.value, yytext);
+                            sym.length = strlen(yytext);
+                            insert_symbol(sym);
+
+                            return CTE_FLOAT;
+                        }
+                        else {
                             printf("Error: cte_float fuera del rango de 32 bits (float): %s\n", yytext);
+                        }       
                     }
 {CTE_STRING}        {
-                        if (strlen(yytext) <= 50)
+                        if (strlen(yytext) <= 50){
+                            symbol sym;
+
+                            snprintf(sym.name, sizeof(sym.name), "_%s", yytext);
+                            strcpy(sym.data_type, "");
+                            strcpy(sym.value, yytext);
+                            sym.length = strlen(yytext);
+                            insert_symbol(sym);
+
                             return CTE_STRING;
-                        else
+                        }
+                        else {
                             printf("Error: tam_max de cadena superado\n");
+                        }
                     }
 
 

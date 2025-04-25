@@ -3,6 +3,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include "symbol.h"
 int yyerror(char* e);
 int yystopparser=0;
 
@@ -221,12 +222,15 @@ int main(int argc, char *argv[])
         printf("\nNo se puede abrir el archivo de prueba: %s\n", argv[1]);
         return 1;
     }
+    create_symbol_table();
 
     int parserResult = yyparse();
 
 	fclose(yyin);
 
 	printf("Syntax OK \n");
+
+    symbol_table_to_file("tabla_simbolos.txt");
     return 0;
 }
 
