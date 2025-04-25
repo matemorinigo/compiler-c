@@ -30,7 +30,7 @@ done
 
 flex ./src/core/Lexico.l
 bison -dyv ./src/core/Sintactico.y -Wcounterexamples
-gcc lex.yy.c y.tab.c -o compiler -lfl
+gcc -Isrc/utils lex.yy.c y.tab.c src/utils/symbol.c src/utils/list.c -o compiler
 ./compiler tests/"$filename"
 rm lex.yy.c
 rm y.tab.c

@@ -22,8 +22,8 @@ void put_in_file(void* s, void* output_file){
     fclose(file);
 }
 
-void create_symbol_table(){
-    crearLista(&symbol_table);
+void create_symbol_table(tLista* symbol_table){
+    crearLista(symbol_table);
 }
 
 int cmp_symbols(const void* s1, const void* s2) {
@@ -46,8 +46,8 @@ int cmp_symbols(const void* s1, const void* s2) {
     return cast_s1->length - cast_s2->length;
 }
 
-void insert_symbol(symbol s){
-    ponerOrdenado(&symbol_table,&s,sizeof(symbol),cmp_symbols);
+void insert_symbol(symbol s, tLista* symbol_table){
+    ponerOrdenado(symbol_table,&s,sizeof(symbol),cmp_symbols);
 }
 
 void write_header(const char* output_file) {
@@ -62,7 +62,7 @@ void write_header(const char* output_file) {
 }
 
 
-void symbol_table_to_file(char* output_file){
+void symbol_table_to_file(char* output_file, tLista* symbol_table){
     write_header(output_file);
-    recorrerLista(&symbol_table, put_in_file, output_file);
+    recorrerLista(symbol_table, put_in_file, output_file);
 }

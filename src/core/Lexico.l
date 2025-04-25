@@ -9,7 +9,7 @@
 #include "y.tab.h"
 
 
-
+extern tLista symbol_table;
 
 %}
 
@@ -124,7 +124,7 @@ CTE_BOOL            {BOOL}
                         strcpy(sym.data_type, "");
                         strcpy(sym.value, "");
                         sym.length = strlen(yytext);
-                        insert_symbol(sym);
+                        insert_symbol(sym, &symbol_table);
 
                         return ID;
                     }
@@ -143,7 +143,7 @@ CTE_BOOL            {BOOL}
                             strcpy(sym.data_type, "");
                             strcpy(sym.value, yytext);
                             sym.length = strlen(yytext);
-                            insert_symbol(sym);
+                            insert_symbol(sym, &symbol_table);
 
                             return CTE_INT;
                         } else {
@@ -161,7 +161,7 @@ CTE_BOOL            {BOOL}
                             strcpy(sym.data_type, "");
                             strcpy(sym.value, yytext);
                             sym.length = strlen(yytext);
-                            insert_symbol(sym);
+                            insert_symbol(sym, &symbol_table);
 
                             return CTE_FLOAT;
                         }
@@ -177,7 +177,7 @@ CTE_BOOL            {BOOL}
                             strcpy(sym.data_type, "");
                             strcpy(sym.value, yytext);
                             sym.length = strlen(yytext);
-                            insert_symbol(sym);
+                            insert_symbol(sym, &symbol_table);
 
                             return CTE_STRING;
                         }
