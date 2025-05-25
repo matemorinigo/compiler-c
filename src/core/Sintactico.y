@@ -3,6 +3,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "symbol.h"
 #include "terceto.h"
 
@@ -14,12 +15,23 @@ int yystopparser=0;
 tLista symbol_table;
 tLista lista_tercetos;
 
+int index_cte;
+int index_assignment;
+
 extern int yylex();
 extern int yyparser();
 extern FILE* yyin;
-
-
 %}
+
+%union {
+    char* str_val;
+    int int_val;
+    float float_val;
+}
+
+%token <str_val> ID CTE_STRING OP_ASIG
+%token <int_val> CTE_INT
+%token <float_val> CTE_FLOAT
 
 %start start
 
@@ -27,7 +39,6 @@ extern FILE* yyin;
 %token LETRA
 %token BOOL
 
-%token OP_ASIG
 %token OP_ARIT
 %token OP_SUM
 %token OP_RES
@@ -63,16 +74,12 @@ extern FILE* yyin;
 %token REORDER
 %token TIPO_DATO
 
-%token ID
-
 %token PUNTO
 %token COM
 %token DOS_PUNTOS
 %token COMA
 
-%token CTE_INT
-%token CTE_FLOAT
-%token CTE_STRING
+
 %token CTE_BOOL
 
 
@@ -121,13 +128,45 @@ sentence:
     ;
 
 assignment:
-    ID OP_ASIG cte {RULE("assignment ->  ID OP_ASIG cte");}
+    ID OP_ASIG cte 
+    {
+        tTerceto terceto;
+        char str_index_cte[20];
+        sprintf(str_index_cte, "%d", index_cte);
+        
+        agregar_terceto(terceto, &lista_tercetos, $2, $1, str_index_cte);
+        RULE("assignment -> ID OP_ASIG cte");
+    }
     ;
 
 cte:
-    CTE_INT {RULE("cte -> CTE_INT");}
-    | CTE_FLOAT {RULE("cte -> CTE_FLOAT");} 
-    | CTE_STRING {RULE("cte -> CTE_STRING");}
+    CTE_INT
+    {
+        printf("Token CTE_INT: %s\n", yytext);
+        tTerceto terceto;
+        char value[50];
+        strcpy(value, yytext);
+        index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+        RULE("cte -> CTE_INT");
+    }
+    | CTE_FLOAT 
+    {
+        printf("Token CTE_FLOAT: %s\n", yytext);
+        tTerceto terceto;
+        char value[50];
+        strcpy(value, yytext);
+        index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+        RULE("cte -> CTE_FLOAT");
+    } 
+    | CTE_STRING 
+    {
+        printf("Token CTE_STRING: %s\n", yytext);
+        tTerceto terceto;
+        char value[50];
+        strcpy(value, yytext);
+        index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+        RULE("cte -> CTE_STRING");
+    }
     ;
 
 selection:
@@ -240,6 +279,7 @@ int main(int argc, char *argv[])
 	printf("Syntax OK \n");
 
     symbol_table_to_file("tabla_simbolos.txt", &symbol_table);
+    terceto_to_file("tercetos.txt", &lista_tercetos);
     return 0;
 }
 

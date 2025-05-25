@@ -10,5 +10,6 @@ typedef struct {
 } tTerceto;
 
 void init_tercetos(tLista* terceto_table);
-void agregar_terceto(tTerceto t, tLista* terceto_table, char* operador, char* op1, char* op2);
+int agregar_terceto(tTerceto t, tLista* terceto_lista, char* operador, char* op1, char* op2);
+void terceto_to_file(char* output_file, tLista* terceto_lista);
 #endif // TERCETO_H

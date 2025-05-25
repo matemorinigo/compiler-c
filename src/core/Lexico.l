@@ -79,7 +79,10 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
 
        
 %%
-{OP_ASIG}           {return OP_ASIG;}
+{OP_ASIG} {
+    yylval.str_val = strdup(yytext);
+    return OP_ASIG;
+}
 {OP_ARIT}           {return OP_ARIT;}
 {OP_SUM}            {return OP_SUM;}
 {OP_MUL}            {return OP_MUL;}
@@ -124,7 +127,7 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
                         strcpy(sym.value, "");
                         sym.length = strlen(yytext);
                         insert_symbol(sym, &symbol_table);
-
+                        yylval.str_val = strdup(yytext);
                         return ID;
                     }
 
