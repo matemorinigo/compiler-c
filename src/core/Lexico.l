@@ -79,15 +79,30 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
 
        
 %%
-{OP_ASIG} {
-    yylval.str_val = strdup(yytext);
-    return OP_ASIG;
-}
-{OP_ARIT}           {return OP_ARIT;}
-{OP_SUM}            {return OP_SUM;}
-{OP_MUL}            {return OP_MUL;}
-{OP_RES}            {return OP_RES;}
-{OP_DIV}            {return OP_DIV;}
+{OP_ASIG}           {
+                        yylval.str_val = strdup(yytext);
+                        return OP_ASIG;
+                    }
+{OP_ARIT}           {
+                        yylval.str_val = strdup(yytext);
+                        return OP_ARIT;
+                    }
+{OP_SUM}            {
+                        yylval.str_val = strdup(yytext);
+                        return OP_SUM;
+                    }
+{OP_MUL}            {
+                        yylval.str_val = strdup(yytext);
+                        return OP_MUL;
+                    }
+{OP_RES}            {
+                        yylval.str_val = strdup(yytext);
+                        return OP_RES;
+                    }
+{OP_DIV}            {
+                        yylval.str_val = strdup(yytext);
+                        return OP_DIV;
+                    }
 
 
 {MAYOR}             {return MAYOR;}
