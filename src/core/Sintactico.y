@@ -17,6 +17,10 @@ tLista lista_tercetos;
 
 int index_cte;
 int index_assignment;
+int index_factor;
+int index_term;
+int index_expression;
+int index_arit_assig;
 
 extern int yylex();
 extern int yyparser();
@@ -29,7 +33,7 @@ extern FILE* yyin;
     float float_val;
 }
 
-%token <str_val> ID CTE_STRING OP_ASIG
+%token <str_val> ID CTE_STRING OP_ASIG OP_DIV OP_MUL OP_RES OP_SUM OP_ARIT
 %token <int_val> CTE_INT
 %token <float_val> CTE_FLOAT
 
@@ -38,12 +42,6 @@ extern FILE* yyin;
 %token DIGITO
 %token LETRA
 %token BOOL
-
-%token OP_ARIT
-%token OP_SUM
-%token OP_RES
-%token OP_MUL
-%token OP_DIV
 
 %token MAYOR
 %token MAYOR_IGUAL
@@ -142,7 +140,6 @@ assignment:
 cte:
     CTE_INT
     {
-        printf("Token CTE_INT: %s\n", yytext);
         tTerceto terceto;
         char value[50];
         strcpy(value, yytext);
@@ -151,7 +148,6 @@ cte:
     }
     | CTE_FLOAT 
     {
-        printf("Token CTE_FLOAT: %s\n", yytext);
         tTerceto terceto;
         char value[50];
         strcpy(value, yytext);
@@ -160,7 +156,6 @@ cte:
     } 
     | CTE_STRING 
     {
-        printf("Token CTE_STRING: %s\n", yytext);
         tTerceto terceto;
         char value[50];
         strcpy(value, yytext);
@@ -190,7 +185,16 @@ comparison:
     ;
 
 arithmetic_assig:
-    ID OP_ARIT expression {RULE("arithmetic_assig -> ID OP_ARIT expression");}
+    ID OP_ARIT expression 
+    {
+        tTerceto terceto;
+        char str_index_expression[20];
+        sprintf(str_index_expression, "%d", index_expression);
+        
+        index_arit_assig = agregar_terceto(terceto, &lista_tercetos, $2, $1, str_index_expression);
+
+        RULE("arithmetic_assig -> ID OP_ARIT expression");
+    }
     ;
 
 
@@ -202,22 +206,103 @@ comparator:
     ;
 
 expression:
-    expression OP_SUM term {RULE("expression -> expression OP_SUM term");}
-    | expression OP_RES term {RULE("expression -> expression OP_RES term");}
-    | term {RULE("expression -> term");}
+    expression OP_SUM term 
+        {
+            tTerceto terceto;
+
+            char str_index_expression[20];
+            sprintf(str_index_expression, "%d", index_expression);
+
+            char str_index_term[20];
+            sprintf(str_index_term, "%d", index_term);
+
+            index_expression = agregar_terceto(terceto, &lista_tercetos, $2,str_index_expression, str_index_term);
+            RULE("expression -> expression OP_SUM term");
+        }
+    | expression OP_RES term 
+        {
+            tTerceto terceto;
+
+            char str_index_expression[20];
+            sprintf(str_index_expression, "%d", index_expression);
+
+            char str_index_term[20];
+            sprintf(str_index_term, "%d", index_term);
+
+            index_expression = agregar_terceto(terceto, &lista_tercetos, $2,str_index_expression, str_index_term);
+            RULE("expression -> expression OP_RES term");
+        }
+    | term 
+        {
+            index_expression = index_term;
+            RULE("expression -> term");
+        }
     ;
 
 term:
-    term OP_MUL factor {RULE("term -> term OP_MUL factor");}
-    | term OP_DIV factor {RULE("term -> term OP_DIV factor");}
-    | factor {RULE("term -> factor");}
+    term OP_MUL factor 
+        {
+            tTerceto terceto;
+
+            char str_index_term[20];
+            sprintf(str_index_term, "%d", index_term);
+
+            char str_index_factor[20];
+            sprintf(str_index_factor, "%d", index_factor);
+
+            index_term = agregar_terceto(terceto, &lista_tercetos, $2,str_index_term, str_index_factor);
+            RULE("term -> term OP_MUL factor");
+        }
+    | term OP_DIV factor 
+        {
+            tTerceto terceto;
+
+            char str_index_term[20];
+            sprintf(str_index_term, "%d", index_term);
+
+            char str_index_factor[20];
+            sprintf(str_index_factor, "%d", index_factor);
+
+            index_term = agregar_terceto(terceto, &lista_tercetos, $2,str_index_term, str_index_factor);
+            RULE("term -> term OP_DIV factor");
+        }
+    | factor 
+        {
+            index_term = index_factor;
+            RULE("term -> factor");
+        }
     ;
 
 factor:
-    PA expression PC {RULE("factor -> PA expression PC");}
-    | ID {RULE("factor -> ID");}
-    | CTE_INT {RULE("factor -> CTE_INT");}
-    | CTE_FLOAT {RULE("factor -> CTE_FLOAT");}
+    PA expression PC 
+        {
+            index_factor = index_expression;
+            RULE("factor -> PA expression PC");
+        }
+    | ID 
+        {
+            tTerceto terceto;
+            char value[50];
+            strcpy(value, yytext);
+            index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            RULE("factor -> ID");
+        }
+    | CTE_INT 
+        {
+            tTerceto terceto;
+            char value[50];
+            strcpy(value, yytext);
+            index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            RULE("factor -> CTE_INT");
+        }
+    | CTE_FLOAT 
+        {
+            tTerceto terceto;
+            char value[50];
+            strcpy(value, yytext);
+            index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            RULE("factor -> CTE_FLOAT");
+        }
     ;
 
 
