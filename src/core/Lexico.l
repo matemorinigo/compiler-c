@@ -72,7 +72,7 @@ COMA                ","
 /*Constantes*/
 CTE_INT             {OP_RES}?{DIGITO}+
 CTE_FLOAT           {OP_RES}?(({DIGITO}*{PUNTO}{DIGITO}+)|({DIGITO}+{PUNTO}{DIGITO}*))
-CTE_STRING          {COM}({DIGITO}|{LETRA}|" ")*{COM}
+CTE_STRING          \"([^\"\n]|\\\")*\"
 CTE_BOOL            {BOOL}
 
 COMM                {OPEN_COMM}.*{CLOSE_COMM}
