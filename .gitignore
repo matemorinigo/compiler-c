@@ -64,3 +64,5 @@ y.output
 y.tab.h
 compilador
 /cmake-build-debug/CMakeFiles/clion-Debug-log.txt
+
+tabla_simbolos.txt
