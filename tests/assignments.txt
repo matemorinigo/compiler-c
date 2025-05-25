@@ -1,9 +1,0 @@
-init {
-    a, b, c : Int
-}
-a := 99999.99
-a := 99.
-a := .9999
-
-b := "@sdADaSjfla%dfg"
-b := "asldk  fh sjf"
