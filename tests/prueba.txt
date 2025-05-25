@@ -1,6 +1,7 @@
 init {
     a, b, c : Int
 }
+#+ Esto es un comentario +#
 a := 1
 b := 1
 c := 3

@@ -75,6 +75,7 @@ CTE_FLOAT           {OP_RES}?(({DIGITO}*{PUNTO}{DIGITO}+)|({DIGITO}+{PUNTO}{DIGI
 CTE_STRING          {COM}({DIGITO}|{LETRA}|" ")*{COM}
 CTE_BOOL            {BOOL}
 
+COMM                {OPEN_COMM}.*{CLOSE_COMM}
 
        
 %%
@@ -101,8 +102,6 @@ CTE_BOOL            {BOOL}
 {PC}                {return PC;}
 {CBO}               {return CBO;}
 {CBC}               {return CBC;}
-{OPEN_COMM}         {return OPEN_COMM;}
-{CLOSE_COMM}        {return CLOSE_COMM;}
 {OPEN_BRACKET}      {return OPEN_BRACKET;}
 {CLOSE_BRACKET}     {return CLOSE_BRACKET;}
 
@@ -140,7 +139,7 @@ CTE_BOOL            {BOOL}
                             symbol sym;
 
                             snprintf(sym.name, sizeof(sym.name), "_%s", yytext);
-                            strcpy(sym.data_type, "");
+                            strcpy(sym.data_type, "int");
                             strcpy(sym.value, yytext);
                             sym.length = strlen(yytext);
                             insert_symbol(sym, &symbol_table);
@@ -158,7 +157,7 @@ CTE_BOOL            {BOOL}
                             symbol sym;
 
                             snprintf(sym.name, sizeof(sym.name), "_%s", yytext);
-                            strcpy(sym.data_type, "");
+                            strcpy(sym.data_type, "float");
                             strcpy(sym.value, yytext);
                             sym.length = strlen(yytext);
                             insert_symbol(sym, &symbol_table);
@@ -174,7 +173,7 @@ CTE_BOOL            {BOOL}
                             symbol sym;
 
                             snprintf(sym.name, sizeof(sym.name), "_%s", yytext);
-                            strcpy(sym.data_type, "");
+                            strcpy(sym.data_type, "string");
                             strcpy(sym.value, yytext);
                             sym.length = strlen(yytext);
                             insert_symbol(sym, &symbol_table);
@@ -186,7 +185,7 @@ CTE_BOOL            {BOOL}
                         }
                     }
 
-
+{COMM}
 "\n"      		    
 "\t"
 "\n\t"

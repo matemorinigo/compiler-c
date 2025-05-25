@@ -1,0 +1,16 @@
+Nombre                                                 |Tipo dato |Valor                                                  |Longitud
+_"a es mas grande que b y c es mas grande que b"       |string    |"a es mas grande que b y c es mas grande que b"        |47   
+_"a es mas grande que b"                               |string    |"a es mas grande que b"                                |23   
+_"amarillo"                                            |string    |"amarillo"                                             |10   
+_"hola"                                                |string    |"hola"                                                 |6    
+_"verde"                                               |string    |"verde"                                                |7    
+_0                                                     |int       |0                                                      |1    
+_1                                                     |int       |1                                                      |1    
+_2                                                     |int       |2                                                      |1    
+_3                                                     |int       |3                                                      |1    
+_6                                                     |int       |6                                                      |1    
+_9                                                     |int       |9                                                      |1    
+a                                                      |          |                                                       |1    
+b                                                      |          |                                                       |1    
+c                                                      |          |                                                       |1    
+x                                                      |          |                                                       |1    
