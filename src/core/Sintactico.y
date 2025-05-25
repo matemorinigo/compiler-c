@@ -115,6 +115,7 @@ sentence:
     | output {RULE("sentence -> output");}
     | sliceAndConcat {RULE("sentence -> sliceAndConcat");}
     | reorder {RULE("sentence -> reorder");}
+    | /* empty */ {RULE("sentence -> empty");}
     ;
 
 assignment:
