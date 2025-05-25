@@ -25,7 +25,7 @@ int agregar_terceto(tTerceto t, tLista* terceto_lista, char* operador, char* op1
 void poner_en_archivo(void* t, void* output_file){
     tTerceto* terceto = (tTerceto*)t;
     FILE* file = (FILE*)output_file;
-    fprintf(file, "%d: %s %s %s\n", 
+    fprintf(file, "[%d] (%s, %s, %s)\n", 
         terceto->indice,
         terceto->operador,
         terceto->op1[0] == '\0' ? "NULL" : terceto->op1,
