@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "symbol.h"
+#include "terceto.h"
 
 extern char* yytext;
 
@@ -11,6 +12,7 @@ extern char* yytext;
 int yyerror(char* e);
 int yystopparser=0;
 tLista symbol_table;
+tLista lista_tercetos;
 
 extern int yylex();
 extern int yyparser();
@@ -229,6 +231,7 @@ int main(int argc, char *argv[])
         return 1;
     }
     create_symbol_table(&symbol_table);
+    init_tercetos(&lista_tercetos);
 
     int parserResult = yyparse();
 
