@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include "symbol.h"
 
+extern char* yytext;
+
 #define RULE(x) printf("Rule recognized: %s \n", x);
 int yyerror(char* e);
 int yystopparser=0;
@@ -239,6 +241,8 @@ int main(int argc, char *argv[])
 
 int yyerror(char* e)
 {
-    printf("Error Sintactico\n");
-	exit (1);
+    extern int yylineno;
+    printf("Error Sintactico en la línea %d: %s\n", yylineno, e);
+    printf("Token inesperado o contexto: '%s'\n", yytext);
+    exit(1);
 }
