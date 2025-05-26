@@ -23,6 +23,7 @@ int index_expression;
 int index_arit_assig;
 int index_comparison;
 int index_condition;
+int aux_index_condition;
 int index_selection;
 
 extern int yylex();
@@ -167,8 +168,26 @@ cte:
     ;
 
 selection:
-    IF PA condition PC CBO group_of_sentences CBC 
+    IF PA condition 
         {
+            tTerceto terceto;
+
+            char str_index_condition[20];
+            sprintf(str_index_condition, "%d", $3);
+
+            aux_index_condition = agregar_terceto(terceto, &lista_tercetos, "JF", str_index_condition, NULL);
+        } 
+        PC CBO group_of_sentences CBC 
+        {
+            tTerceto terceto;
+
+            char str_index_condition[20];
+            sprintf(str_index_condition, "%d", aux_index_condition);
+
+            char str_index_false[20];
+            sprintf(str_index_false, "%d", obtener_indice_actual() + 1);
+
+            actualizar_terceto(&lista_tercetos, aux_index_condition, "JF", str_index_condition, str_index_false);
             RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");
         }
     | IF PA condition PC CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC 
