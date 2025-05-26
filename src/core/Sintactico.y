@@ -21,6 +21,9 @@ int index_factor;
 int index_term;
 int index_expression;
 int index_arit_assig;
+int index_comparison;
+int index_condition;
+int index_selection;
 
 extern int yylex();
 extern int yyparser();
@@ -33,24 +36,20 @@ extern FILE* yyin;
     float float_val;
 }
 
-%token <str_val> ID CTE_STRING OP_ASIG OP_DIV OP_MUL OP_RES OP_SUM OP_ARIT
+%token <str_val> ID CTE_STRING OP_ASIG OP_DIV OP_MUL OP_RES OP_SUM OP_ARIT MAYOR MAYOR_IGUAL MENOR MENOR_IGUAL
 %token <int_val> CTE_INT
 %token <float_val> CTE_FLOAT
+%left <str_val> AND OR
+%right <str_val> NOT
+
+%type <int_val> expression factor term arithmetic_assig cte comparison condition selection
+
 
 %start start
 
 %token DIGITO
 %token LETRA
 %token BOOL
-
-%token MAYOR
-%token MAYOR_IGUAL
-%token MENOR
-%token MENOR_IGUAL
-
-%left AND
-%left OR
-%right NOT
 
 %token PA
 %token PC
@@ -139,34 +138,54 @@ assignment:
 
 cte:
     CTE_INT
-    {
-        tTerceto terceto;
-        char value[50];
-        strcpy(value, yytext);
-        index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
-        RULE("cte -> CTE_INT");
-    }
+        {
+            tTerceto terceto;
+            char value[50];
+            strcpy(value, yytext);
+            index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            $$ = index_cte;
+            RULE("cte -> CTE_INT");
+        }
     | CTE_FLOAT 
-    {
-        tTerceto terceto;
-        char value[50];
-        strcpy(value, yytext);
-        index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
-        RULE("cte -> CTE_FLOAT");
-    } 
+        {
+            tTerceto terceto;
+            char value[50];
+            strcpy(value, yytext);
+            index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            $$ = index_cte;
+            RULE("cte -> CTE_FLOAT");
+        } 
     | CTE_STRING 
-    {
-        tTerceto terceto;
-        char value[50];
-        strcpy(value, yytext);
-        index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
-        RULE("cte -> CTE_STRING");
-    }
+        {
+            tTerceto terceto;
+            char value[50];
+            strcpy(value, yytext);
+            index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            $$ = index_cte;
+            RULE("cte -> CTE_STRING");
+        }
     ;
 
 selection:
-    IF PA condition PC CBO group_of_sentences CBC {RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");}
-    | IF PA condition PC CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC {RULE("selection -> IF PA condition PC CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC");}
+    IF PA condition PC CBO group_of_sentences CBC 
+        {
+            tTerceto terceto;
+            char str_index_condition[20];
+            sprintf(str_index_condition, "%d", index_condition);
+
+            int pos_final_if = obtener_indice_actual() + 2;
+            char str_index_pos_final_if[20];
+            sprintf(str_index_pos_final_if, "%d", pos_final_if);
+
+            index_selection = agregar_terceto(terceto, &lista_tercetos, "IF", str_index_condition, str_index_pos_final_if);
+            
+            $$ = index_selection;
+            RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");
+        }
+    | IF PA condition PC CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC 
+        {
+            RULE("selection -> IF PA condition PC CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC");
+        }
     ;
 
 loop:
@@ -174,14 +193,110 @@ loop:
     ;
 
 condition:
-    comparison {RULE("condition -> comparison");}
-    | condition AND comparison {RULE("condition -> condition AND comparison");}
-    | condition OR comparison {RULE("condition -> condition OR comparison");}
-    | NOT condition {RULE("condition -> NOT condition");}
+    comparison 
+        {
+            index_condition = index_comparison;
+            $$ = index_condition;
+            RULE("condition -> comparison");
+        }
+    | condition AND comparison 
+        {
+            tTerceto terceto;
+
+            char izq[20];
+            sprintf(izq, "%d", index_condition);
+
+            char der[20];
+            sprintf(der, "%d", index_comparison);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, $2, izq, der);
+            $$ = index_condition;
+            RULE("condition -> condition AND comparison");
+        }
+    | condition OR comparison 
+        {
+            tTerceto terceto;
+
+            char izq[20];
+            sprintf(izq, "%d", index_condition);
+
+            char der[20];
+            sprintf(der, "%d", index_comparison);
+        
+            index_condition = agregar_terceto(terceto, &lista_tercetos, $2, izq, der);
+            $$ = index_condition;
+            RULE("condition -> condition OR comparison");
+        }
+    | NOT condition 
+        {
+            tTerceto terceto;
+
+            char expr[20];
+            sprintf(expr, "%d", index_condition);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, $1, expr, NULL);
+            $$ = index_condition;
+            RULE("condition -> NOT condition");
+        }
     ;
 
 comparison:
-    expression comparator expression {RULE("comparison -> expression comparator expression");}
+    expression MAYOR expression 
+        {
+            tTerceto terceto;
+
+            char str_left[20];
+            sprintf(str_left, "%d", $1);  // resultado de la izquierda
+
+            char str_right[20];
+            sprintf(str_right, "%d", $3);       // resultado de la derecha
+
+            index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
+            $$ = index_comparison;
+            RULE("comparison -> expression MAYOR expression");
+        }
+    | expression MAYOR_IGUAL expression 
+        {
+            tTerceto terceto;
+
+            char str_left[20];
+            sprintf(str_left, "%d", $1);  // resultado de la izquierda
+
+            char str_right[20];
+            sprintf(str_right, "%d", $3);       // resultado de la derecha
+
+            index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
+            $$ = index_comparison;
+            RULE("comparison -> expression MAYOR_IGUAL expression");
+        }
+    | expression MENOR_IGUAL expression 
+        {
+            tTerceto terceto;
+
+            char str_left[20];
+            sprintf(str_left, "%d", $1);  // resultado de la izquierda
+
+            char str_right[20];
+            sprintf(str_right, "%d", $3);       // resultado de la derecha
+
+            index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
+            $$ = index_comparison;
+            RULE("comparison -> expression MENOR_IGUAL expression");
+        }
+    | expression MENOR expression 
+        {
+            tTerceto terceto;
+
+            char str_left[20];
+            sprintf(str_left, "%d", $1);  // resultado de la izquierda
+
+            char str_right[20];
+            sprintf(str_right, "%d", $3);       // resultado de la derecha
+
+            index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
+            $$ = index_comparison;
+            RULE("comparison -> expression MENOR expression");
+        }
     ;
 
 arithmetic_assig:
@@ -192,17 +307,10 @@ arithmetic_assig:
         sprintf(str_index_expression, "%d", index_expression);
         
         index_arit_assig = agregar_terceto(terceto, &lista_tercetos, $2, $1, str_index_expression);
+        $$ = index_arit_assig;
 
         RULE("arithmetic_assig -> ID OP_ARIT expression");
     }
-    ;
-
-
-comparator:
-    MAYOR {RULE("comparator -> MAYOR");}
-    | MAYOR_IGUAL {RULE("comparator -> MAYOR_IGUAL");}
-    | MENOR_IGUAL {RULE("comparator -> MENOR_IGUAL");}
-    | MENOR {RULE("comparator -> MENOR");}
     ;
 
 expression:
@@ -217,6 +325,7 @@ expression:
             sprintf(str_index_term, "%d", index_term);
 
             index_expression = agregar_terceto(terceto, &lista_tercetos, $2,str_index_expression, str_index_term);
+            $$ = index_expression;
             RULE("expression -> expression OP_SUM term");
         }
     | expression OP_RES term 
@@ -230,11 +339,13 @@ expression:
             sprintf(str_index_term, "%d", index_term);
 
             index_expression = agregar_terceto(terceto, &lista_tercetos, $2,str_index_expression, str_index_term);
+            $$ = index_expression;
             RULE("expression -> expression OP_RES term");
         }
     | term 
         {
             index_expression = index_term;
+            $$ = index_expression;
             RULE("expression -> term");
         }
     ;
@@ -251,6 +362,7 @@ term:
             sprintf(str_index_factor, "%d", index_factor);
 
             index_term = agregar_terceto(terceto, &lista_tercetos, $2,str_index_term, str_index_factor);
+            $$ = index_term;
             RULE("term -> term OP_MUL factor");
         }
     | term OP_DIV factor 
@@ -264,11 +376,13 @@ term:
             sprintf(str_index_factor, "%d", index_factor);
 
             index_term = agregar_terceto(terceto, &lista_tercetos, $2,str_index_term, str_index_factor);
+            $$ = index_term;
             RULE("term -> term OP_DIV factor");
         }
     | factor 
         {
             index_term = index_factor;
+            $$ = index_term;
             RULE("term -> factor");
         }
     ;
@@ -277,6 +391,7 @@ factor:
     PA expression PC 
         {
             index_factor = index_expression;
+            $$ = index_factor;
             RULE("factor -> PA expression PC");
         }
     | ID 
@@ -285,6 +400,7 @@ factor:
             char value[50];
             strcpy(value, yytext);
             index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            $$ = index_factor;
             RULE("factor -> ID");
         }
     | CTE_INT 
@@ -293,6 +409,7 @@ factor:
             char value[50];
             strcpy(value, yytext);
             index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            $$ = index_factor;
             RULE("factor -> CTE_INT");
         }
     | CTE_FLOAT 
@@ -301,6 +418,7 @@ factor:
             char value[50];
             strcpy(value, yytext);
             index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            $$ = index_factor;
             RULE("factor -> CTE_FLOAT");
         }
     ;
