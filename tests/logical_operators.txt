@@ -1,22 +1,16 @@
 init {
     a, b, c : Int
 }
-
-a := 1
-b := 1
-c := 2
-
-if (a > b AND c > b)
+if (a > b)
 {
-    write("a es mas grande que b y c es mas grande que b")
-}
-
-if (a > b OR c > b)
-{
-    write("a es mas grande que b o c es mas grande que b")
-}
-
-if (NOT a > b)
-{
-    write("a no es mas grande que b")
+    a := 5
+    if (b < c)
+    {
+        b := 7
+    }
+    else
+    {
+        c := 1
+    }
+    j := 9
 }
