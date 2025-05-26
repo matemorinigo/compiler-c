@@ -240,3 +240,31 @@ void ordenarListaSeleccion(tLista* pl,int cmp(const void*,const void*))
     *pListaOrdenada = NULL;
     *pl = listaOrdenada;
 }
+
+int actualizarNodo(tLista* pl, const void* datoBuscar, const void* datoNuevo, size_t tamDato, int cmp(const void*, const void*))
+{
+    tNodo* nuevo;
+
+    while (*pl && cmp((*pl)->dato, datoBuscar) != 0)
+        pl = &(*pl)->siguiente;
+
+    if (*pl == NULL)
+        return 0;
+
+    if ((nuevo = (tNodo*)malloc(sizeof(tNodo))) == NULL ||
+            (nuevo->dato = malloc(tamDato)) == NULL)
+    {
+        free(nuevo);
+        return 0;
+    }
+
+    memcpy(nuevo->dato, datoNuevo, tamDato);
+    nuevo->tamDato = tamDato;
+    nuevo->siguiente = (*pl)->siguiente;
+
+    free((*pl)->dato);
+    free(*pl);
+    *pl = nuevo;
+
+    return 1;
+}
