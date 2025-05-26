@@ -46,3 +46,14 @@ void terceto_to_file(char* output_file, tLista* terceto_lista){
     fclose(file);
 }
 
+int actualizar_terceto(tLista* terceto_lista, int indice, char* operador, char* op1, char* op2)
+{
+    tTerceto tercetoBuscar = { .indice = indice };
+    tTerceto tercetoNuevo = { .indice = indice };
+    strcpy(tercetoNuevo.operador, operador);
+    strcpy(tercetoNuevo.op1, op1 == NULL ? "NULL" : op1);
+    strcpy(tercetoNuevo.op2, op2 == NULL ? "NULL" : op2);
+
+    return actualizarNodo(terceto_lista, &tercetoBuscar, &tercetoNuevo, sizeof(tTerceto), cmp_terceto);
+}
+

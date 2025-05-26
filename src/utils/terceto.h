@@ -13,4 +13,5 @@ void init_tercetos(tLista* terceto_table);
 int agregar_terceto(tTerceto t, tLista* terceto_lista, char* operador, char* op1, char* op2);
 void terceto_to_file(char* output_file, tLista* terceto_lista);
 int obtener_indice_actual();
+int actualizar_terceto(tLista* terceto_lista, int indice, char* operador, char* op1, char* op2);
 #endif // TERCETO_H
