@@ -32,6 +32,10 @@ void poner_en_archivo(void* t, void* output_file){
         terceto->op2[0] == '\0' ? "NULL" : terceto->op2);
 }
 
+int obtener_indice_actual() {
+    return indice;
+}
+
 void terceto_to_file(char* output_file, tLista* terceto_lista){
     FILE* file = fopen(output_file, "w");
     if (file == NULL) {
