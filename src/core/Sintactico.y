@@ -44,7 +44,7 @@ extern FILE* yyin;
 %left <str_val> AND OR
 %right <str_val> NOT
 
-%type <int_val> expression factor term arithmetic_assig cte comparison condition selection selection_condition
+%type <int_val> expression factor term arithmetic_assig cte comparison condition selection selection_condition loop while_condition
 
 
 %start start
@@ -218,8 +218,40 @@ selection_condition:
         }
 
 loop:
-    WHILE PA condition PC CBO group_of_sentences CBC {RULE("loop -> WHILE PA condition PC CBO group_of_sentences CBC ");}
+    while_condition CBO group_of_sentences CBC 
+        {
+            tTerceto terceto;
+
+            char str_index_condition[20];    
+            sprintf(str_index_condition,"%d",index_condition);
+
+            char str_index_false[20];
+            sprintf(str_index_false, "%d", obtener_indice_actual() + 2);
+
+            char str_index_loopback[20];
+            sprintf(str_index_loopback, "%d", $1);
+
+            actualizar_terceto(&lista_tercetos, $1, "JF", str_index_condition, str_index_false);
+
+            /*Fijarse si vuelve a str_index_loopback o tiene que retorceder mas*/
+            $$ = agregar_terceto(terceto,&lista_tercetos,"BI",str_index_loopback,NULL); 
+            
+            RULE("loop -> WHILE PA condition PC CBO group_of_sentences CBC ");
+        }
     ;
+while_condition:
+    WHILE PA condition PC
+    {
+        tTerceto terceto;
+
+        char str_index_condition[20];
+
+        sprintf(str_index_condition,"%d",index_condition);
+
+        $$ = agregar_terceto(terceto,&lista_tercetos,"JF",str_index_condition,NULL);        
+    }
+    ;
+
 
 condition:
     comparison 
