@@ -169,17 +169,6 @@ cte:
 selection:
     IF PA condition PC CBO group_of_sentences CBC 
         {
-            tTerceto terceto;
-            char str_index_condition[20];
-            sprintf(str_index_condition, "%d", index_condition);
-
-            int pos_final_if = obtener_indice_actual() + 2;
-            char str_index_pos_final_if[20];
-            sprintf(str_index_pos_final_if, "%d", pos_final_if);
-
-            index_selection = agregar_terceto(terceto, &lista_tercetos, "IF", str_index_condition, str_index_pos_final_if);
-            
-            $$ = index_selection;
             RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");
         }
     | IF PA condition PC CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC 
