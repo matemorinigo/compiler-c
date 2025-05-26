@@ -105,15 +105,36 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
                     }
 
 
-{MAYOR}             {return MAYOR;}
-{MAYOR_IGUAL}       {return MAYOR_IGUAL;}
-{MENOR}             {return MENOR;}
-{MENOR_IGUAL}       {return MENOR_IGUAL;}
+{MAYOR}             {
+                        yylval.str_val = strdup(yytext);
+                        return MAYOR;
+                    }
+{MAYOR_IGUAL}       {
+                        yylval.str_val = strdup(yytext);
+                        return MAYOR_IGUAL;
+                    }
+{MENOR}             {
+                        yylval.str_val = strdup(yytext);
+                        return MENOR;
+                    }
+{MENOR_IGUAL}       {
+                        yylval.str_val = strdup(yytext);
+                        return MENOR_IGUAL;
+                    }
 
 
-{AND}               {return AND;}
-{OR}                {return OR;}
-{NOT}               {return NOT;}
+{AND}               {
+                        yylval.str_val = strdup(yytext);
+                        return AND;
+                    }
+{OR}                {
+                        yylval.str_val = strdup(yytext);
+                        return OR;
+                    }
+{NOT}               {
+                        yylval.str_val = strdup(yytext);
+                        return NOT;
+                    }
 
 
 {PA}                {return PA;}
