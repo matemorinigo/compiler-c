@@ -25,6 +25,7 @@ int index_comparison;
 int index_condition;
 int aux_index_condition;
 int index_selection;
+int aux_index_jump;
 
 extern int yylex();
 extern int yyparser();
@@ -180,8 +181,28 @@ selection:
             actualizar_terceto(&lista_tercetos, aux_index_condition, "JF", str_index_condition, str_index_false);
             RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");
         }
-    | selection_condition CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC
+    | selection_condition CBO group_of_sentences CBC ELSE 
         {
+            tTerceto terceto;
+
+            aux_index_jump = agregar_terceto(terceto, &lista_tercetos, "JMP", NULL, NULL);
+
+            char str_index_condition[20];
+            sprintf(str_index_condition, "%d", index_condition);
+
+            char str_index_false[20];
+            sprintf(str_index_false, "%d", obtener_indice_actual() + 1);
+
+            actualizar_terceto(&lista_tercetos, aux_index_condition, "JF", str_index_condition, str_index_false);
+            RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");
+        }
+        CBO group_of_sentences CBC
+        {
+            char str_index_false[20];
+            sprintf(str_index_false, "%d", obtener_indice_actual() + 1);
+
+            actualizar_terceto(&lista_tercetos, aux_index_jump, "JMP", NULL, str_index_false);
+
             RULE("selection -> IF PA condition PC CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC");
         }
 
