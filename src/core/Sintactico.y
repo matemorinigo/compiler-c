@@ -122,7 +122,6 @@ sentence:
     | output {RULE("sentence -> output");}
     | sliceAndConcat {RULE("sentence -> sliceAndConcat");}
     | reorder {RULE("sentence -> reorder");}
-    | /* empty */ {RULE("sentence -> empty");}
     ;
 
 assignment:
@@ -168,21 +167,12 @@ cte:
     ;
 
 selection:
-    IF PA condition 
+    selection_condition CBO group_of_sentences CBC
         {
             tTerceto terceto;
 
             char str_index_condition[20];
-            sprintf(str_index_condition, "%d", $3);
-
-            aux_index_condition = agregar_terceto(terceto, &lista_tercetos, "JF", str_index_condition, NULL);
-        } 
-        PC CBO group_of_sentences CBC 
-        {
-            tTerceto terceto;
-
-            char str_index_condition[20];
-            sprintf(str_index_condition, "%d", aux_index_condition);
+            sprintf(str_index_condition, "%d", index_condition);
 
             char str_index_false[20];
             sprintf(str_index_false, "%d", obtener_indice_actual() + 1);
@@ -190,11 +180,21 @@ selection:
             actualizar_terceto(&lista_tercetos, aux_index_condition, "JF", str_index_condition, str_index_false);
             RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");
         }
-    | IF PA condition PC CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC 
+    | selection_condition CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC
         {
             RULE("selection -> IF PA condition PC CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC");
         }
-    ;
+
+selection_condition:
+    IF PA condition PC
+        {
+            tTerceto terceto;
+
+            char str_index_condition[20];
+            sprintf(str_index_condition, "%d", index_condition);
+
+            aux_index_condition = agregar_terceto(terceto, &lista_tercetos, "JF", str_index_condition, NULL);
+        }
 
 loop:
     WHILE PA condition PC CBO group_of_sentences CBC {RULE("loop -> WHILE PA condition PC CBO group_of_sentences CBC ");}
