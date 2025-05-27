@@ -1,0 +1,4 @@
+init {
+    a : Int
+}
+reorder([x+1, 2-f, 3+c], 0, 0)
