@@ -2,10 +2,10 @@
 flex .\src\core\Lexico.l
 bison -dyv .\src\core\Sintactico.y
 
-gcc.exe -Isrc/utils lex.yy.c y.tab.c src/utils/symbol.c src/utils/list.c src/utils/terceto.c -o compilador.exe
+gcc.exe -Isrc/utils lex.yy.c y.tab.c src/utils/symbol.c src/utils/list.c src/utils/terceto.c src/utils/reorder.c -o compilador.exe
 
 
-compilador.exe tests\prueba.txt
+compilador.exe tests\reorder.txt
 
 @echo off
 del compilador.exe
