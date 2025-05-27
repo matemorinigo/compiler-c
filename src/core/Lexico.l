@@ -183,6 +183,7 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
                             sym.length = strlen(yytext);
                             insert_symbol(sym, &symbol_table);
 
+                            yylval.int_val = (int)value;
                             return CTE_INT;
                         } else {
                             printf("Error: cte_int fuera del rango de 16 bits: %ld\n", value);
