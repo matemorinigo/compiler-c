@@ -4,8 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "list.h"
 #include "symbol.h"
 #include "terceto.h"
+#include "reorder.h"
 
 extern char* yytext;
 
@@ -26,6 +28,7 @@ int index_condition;
 int aux_index_condition;
 int index_selection;
 int aux_index_jump;
+int contador_expresiones_reorder;
 
 extern int yylex();
 extern int yyparser();
@@ -45,7 +48,6 @@ extern FILE* yyin;
 %right <str_val> NOT
 
 %type <int_val> expression factor term arithmetic_assig cte comparison condition selection selection_condition
-
 
 %start start
 
@@ -467,12 +469,79 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
     ;
 
 reorder: /*El anteultimo cte/id tendria que ser un bool*/
-    REORDER PA OPEN_BRACKET expressions_list CLOSE_BRACKET COMA cte_int_o_id COMA cte_int_o_id PC {RULE("reorder");}
-    ; 
+    REORDER PA OPEN_BRACKET expressions_list CLOSE_BRACKET COMA CTE_INT COMA CTE_INT PC 
+        {
+            int direccion = $7; //1: izq, 0: der
+            int pivote = $9;
+            int inicio_ordenamiento;
+            int fin_ordenamiento;
+            tTerceto terceto;
+            char* nombre_base_variable_aux = "@expr_";
+            char nombre_dinamico_variable[50];
+            int contador;
+
+            //Validaciones
+            if (direccion < 0 && direccion > 1)
+            {
+                yyerror("Dirección inválida. Debe ser 0 (derecha) o 1 (izquierda).");
+            }
+            if (pivote < 0 || pivote > contador_expresiones_reorder)
+            {
+                yyerror("Pivote fuera de rango");
+            }
+
+            // Inicio de ordenamiento
+            if (direccion == 0)
+            {
+                inicio_ordenamiento = pivote;
+                fin_ordenamiento = contador_expresiones_reorder + 1;
+            }
+            else
+            {
+                inicio_ordenamiento = 0;
+                fin_ordenamiento = pivote + 1;
+            }
+            //Crear los tercetos que ordenaran las variables
+            crear_tercetor_ordenamiento(inicio_ordenamiento, fin_ordenamiento, nombre_base_variable_aux, &lista_tercetos);
+
+            // Mostrar resultado
+            crear_print_tercetos(contador, contador_expresiones_reorder, nombre_base_variable_aux, &lista_tercetos);
+
+            RULE("REORDER -> REORDER PA OPEN_BRACKET expressions_list CLOSE_BRACKET COMA CTE_INT COMA CTE_INT PC");
+        }
+    ;
 
 expressions_list:
-    expressions_list COMA expression {RULE("expressions_list -> expressions_list COMA expression");}
-    | expression {RULE("expressions_list -> expression");}
+    expressions_list COMA expression 
+        {
+            char* nombre_base_variable_aux = "@expr_";
+            char nombre_dinamico_variable[50];
+            char str_index_expression[50];
+            tTerceto terceto;
+
+            contador_expresiones_reorder++;
+            sprintf(str_index_expression,"%d", $3);
+            sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
+
+            agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
+
+            RULE("expressions_list -> expressions_list COMA expression");
+        }
+    | expression 
+        {
+            char* nombre_base_variable_aux = "@expr_";
+            char nombre_dinamico_variable[50];
+            char str_index_expression[50];
+            tTerceto terceto;
+
+            contador_expresiones_reorder = 0;
+            sprintf(str_index_expression,"%d", $1);
+            sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
+
+            agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
+
+            RULE("expressions_list -> expression");
+        }
     ;
 
 cte_int_o_id:
