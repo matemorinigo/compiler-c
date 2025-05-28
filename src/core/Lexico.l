@@ -23,6 +23,7 @@ BOOL                [0-1]
 
 /*Operadores*/
 OP_ASIG   		    ":="
+OP_ASIG_COMUN       "="
 OP_ARIT             "=:"
 OP_SUM		        "+"
 OP_MUL              "*"
@@ -82,6 +83,10 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
 {OP_ASIG}           {
                         yylval.str_val = strdup(yytext);
                         return OP_ASIG;
+                    }
+{OP_ASIG_COMUN}     {
+                        yylval.str_val = strdup(yytext);
+                        return OP_ASIG_COMUN;
                     }
 {OP_ARIT}           {
                         yylval.str_val = strdup(yytext);
@@ -218,6 +223,7 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
                             sym.length = strlen(yytext);
                             insert_symbol(sym, &symbol_table);
 
+                            yylval.str_val = strdup(yytext);
                             return CTE_STRING;
                         }
                         else {

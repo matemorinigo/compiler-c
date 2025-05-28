@@ -8,6 +8,9 @@
 #include "symbol.h"
 #include "terceto.h"
 #include "reorder.h"
+#include "slice_and_concat.h"
+#define SLICE_AND_CONCAT_OK 0
+#define SLICE_AND_CONCAT_ERROR 1
 
 extern char* yytext;
 
@@ -41,7 +44,7 @@ extern FILE* yyin;
     float float_val;
 }
 
-%token <str_val> ID CTE_STRING OP_ASIG OP_DIV OP_MUL OP_RES OP_SUM OP_ARIT MAYOR MAYOR_IGUAL MENOR MENOR_IGUAL
+%token <str_val> ID CTE_STRING OP_ASIG OP_DIV OP_MUL OP_RES OP_SUM OP_ARIT MAYOR MAYOR_IGUAL MENOR MENOR_IGUAL OP_ASIG_COMUN
 %token <int_val> CTE_INT
 %token <float_val> CTE_FLOAT
 %left <str_val> AND OR
@@ -497,7 +500,70 @@ output:
     ;
 
 sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
-    SLICE_AND_CONCAT PA cte_int_o_id COMA cte_int_o_id COMA cte_string_o_id COMA cte_string_o_id COMA cte_int_o_id PC {RULE("sliceAndConcat");}
+    ID OP_ASIG_COMUN SLICE_AND_CONCAT PA CTE_INT COMA CTE_INT COMA CTE_STRING COMA CTE_STRING COMA CTE_INT PC 
+        {
+            // Variables Auxiliares
+            int idx_aux;
+            char str_idx_aux[50];
+
+            // Asignacion de variables
+            tTerceto terceto;
+            char id_destino[50];
+            strcpy(id_destino, $1);
+            int limite_inicial = $5;
+            int limite_final = $7;
+            char palabra1[50];
+            char palabra2[50];
+            char str_final[50];
+            strcpy(palabra1, $9);
+            strcpy(palabra2, $11);
+
+            eliminar_caracter(palabra1, '"');
+            eliminar_caracter(palabra2, '"');
+
+            int concatenarEnPalabra1 = $13; //Booleano, si True, cortamos palabra 2 y concatenamos a 1
+                                            //Si False, cortamos palabra 1 y concatenamos a 2
+
+            //Validar
+            if(validar_concatenarEnPalabra1(concatenarEnPalabra1) == SLICE_AND_CONCAT_ERROR)
+            {
+                yyerror("valor de concatenarEnPalabra1 inválida, debe ser 0 o 1");
+            }
+            
+            // Generar str_final
+            if (concatenarEnPalabra1 == 1)
+            {
+                //Validamos limites
+                if (validar_limites(limite_inicial, limite_final, palabra2) == SLICE_AND_CONCAT_ERROR)
+                {
+                    yyerror("Límites fuera de rango");
+                }
+                if (slice_and_concat(str_final, palabra1, palabra2, limite_inicial, limite_final) == SLICE_AND_CONCAT_ERROR)
+                {
+                    yyerror("La cadena final excede los 50 caracteres");
+                }
+            }
+            else
+            {
+                //Validamos limites
+                if (validar_limites(limite_inicial, limite_final, palabra1) == SLICE_AND_CONCAT_ERROR)
+                {
+                    yyerror("Límites fuera de rango");
+                }
+                if (slice_and_concat(str_final, palabra2, palabra1, limite_inicial, limite_final) == SLICE_AND_CONCAT_ERROR)
+                {
+                    yyerror("La cadena final excede los 50 caracteres");
+                }
+            }
+
+            // Asignar id_destino
+            idx_aux = agregar_terceto(terceto, &lista_tercetos, str_final, NULL, NULL);
+            sprintf(str_idx_aux, "%d", idx_aux);
+
+            agregar_terceto(terceto, &lista_tercetos, ":=", id_destino, str_idx_aux);
+
+            RULE("sliceAndConcat -> SLICE_AND_CONCAT PA CTE_INT COMA CTE_INT COMA CTE_STRING COMA CTE_STRING COMA CTE_INT PC");
+        }
     ;
 
 reorder: /*El anteultimo cte/id tendria que ser un bool*/
@@ -575,21 +641,6 @@ expressions_list:
             RULE("expressions_list -> expression");
         }
     ;
-
-cte_int_o_id:
-    CTE_INT {RULE("cte_int_o_id -> CTE_INT");}
-    | ID {RULE("cte_int_o_id -> ID");}
-    ;
-
-cte_string_o_id:
-    CTE_STRING {RULE("cte_string_o_id -> CTE_STRING");}
-    | ID {RULE("cte_string_o_id -> ID");}
-    ;
-
-/*cte_bool_o_id:
-    CTE_BOOL {RULE("cte_bool_o_id -> CTE_BOOL");}
-    | ID {RULE("cte_bool_o_id -> ID");}
-    ;*/
 
 %%
 
