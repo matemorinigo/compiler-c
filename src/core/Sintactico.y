@@ -491,12 +491,38 @@ factor:
 
 
 input:
-    READ PA ID PC {RULE("input -> READ PA ID PC");}
+    READ PA ID PC 
+        {
+            tTerceto terceto;
+            char var_destino[50];
+            strcpy(var_destino, $3);
+
+            agregar_terceto(terceto, &lista_tercetos, "READ", var_destino, NULL);
+
+            RULE("input -> READ PA ID PC");
+        }
     ;
 
 output:
-    WRITE PA cte PC {RULE("output -> WRITE PA cte PC");}
-    | WRITE PA ID PC {RULE("output -> WRITE PA ID PC");}
+    WRITE PA CTE_STRING PC
+        {
+            tTerceto terceto;
+            char cte_to_print[50];
+            strcpy(cte_to_print, $3);
+
+            agregar_terceto(terceto, &lista_tercetos, "PRINT_STR", cte_to_print, NULL);
+
+            RULE("output -> WRITE PA cte PC");
+        }
+    | WRITE PA ID PC
+        {
+            tTerceto terceto;
+            char id_to_print[50];
+            strcpy(id_to_print, $3);
+
+            agregar_terceto(terceto, &lista_tercetos, "PRINT_VAR", id_to_print, NULL);
+            RULE("output -> WRITE PA ID PC");
+        }
     ;
 
 sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
