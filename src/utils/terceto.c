@@ -57,3 +57,10 @@ int actualizar_terceto(tLista* terceto_lista, int indice, char* operador, char* 
     return actualizarNodo(terceto_lista, &tercetoBuscar, &tercetoNuevo, sizeof(tTerceto), cmp_terceto);
 }
 
+int get_terceto(tLista* terceto_lista, int indice, tTerceto* terceto_destino)
+{
+    tTerceto tercetoBuscar = { .indice = indice };
+    
+    return buscarElemento(terceto_lista, &tercetoBuscar, terceto_destino, sizeof(tTerceto), cmp_terceto);
+}
+

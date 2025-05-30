@@ -268,3 +268,15 @@ int actualizarNodo(tLista* pl, const void* datoBuscar, const void* datoNuevo, si
 
     return 1;
 }
+
+int buscarElemento(tLista* pl, const void* datoBuscar, void* destino, size_t tamDato, int cmp(const void*, const void*))
+{
+    while (*pl && cmp((*pl)->dato, datoBuscar) != 0)
+        pl = &(*pl)->siguiente;
+
+    if (*pl == NULL)
+        return 0;
+
+    memcpy(destino, (*pl)->dato, MIN(tamDato, (*pl)->tamDato));
+    return 1;
+}

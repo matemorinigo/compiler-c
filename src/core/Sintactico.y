@@ -19,6 +19,7 @@ int yyerror(char* e);
 int yystopparser=0;
 tLista symbol_table;
 tLista lista_tercetos;
+tLista aux_declarations;
 
 int index_cte;
 int index_assignment;
@@ -36,6 +37,24 @@ int contador_expresiones_reorder;
 extern int yylex();
 extern int yyparser();
 extern FILE* yyin;
+
+// Función auxiliar para obtener el tipo de dato de una constante desde un terceto
+char* get_cte_datatype(int terceto_index) {
+    tTerceto terceto;
+    if (!get_terceto(&lista_tercetos, terceto_index, &terceto)) {
+        return NULL;
+    }
+    
+    if (strncmp(terceto.operador, "CTE_INT:", 8) == 0) {
+        return "Int";
+    } else if (strncmp(terceto.operador, "CTE_FLOAT:", 10) == 0) {
+        return "Float";
+    } else if (strncmp(terceto.operador, "CTE_STRING:", 11) == 0) {
+        return "String";
+    }
+    
+    return NULL;
+}
 %}
 
 %union {
@@ -44,7 +63,7 @@ extern FILE* yyin;
     float float_val;
 }
 
-%token <str_val> ID CTE_STRING OP_ASIG OP_DIV OP_MUL OP_RES OP_SUM OP_ARIT MAYOR MAYOR_IGUAL MENOR MENOR_IGUAL OP_ASIG_COMUN
+%token <str_val> ID CTE_STRING OP_ASIG OP_DIV OP_MUL OP_RES OP_SUM OP_ARIT MAYOR MAYOR_IGUAL MENOR MENOR_IGUAL OP_ASIG_COMUN TIPO_DATO
 %token <int_val> CTE_INT
 %token <float_val> CTE_FLOAT
 %left <str_val> AND OR
@@ -76,7 +95,6 @@ extern FILE* yyin;
 %token WHILE
 %token SLICE_AND_CONCAT
 %token REORDER
-%token TIPO_DATO
 
 %token PUNTO
 %token COM
@@ -106,12 +124,29 @@ multiple_datatype_declaration:
     ;
 
 datatype_declaration:
-    var_list DOS_PUNTOS TIPO_DATO {RULE("datatype_declaration -> var_list DOS_PUNTOS TIPO_DATO");}
+    var_list DOS_PUNTOS TIPO_DATO 
+        {
+            char aux[50];
+            while(sacarPrimero(&aux_declarations, aux, sizeof(aux)))
+            {
+                update_symbol_data_type(aux, $3, &symbol_table);
+            }
+            RULE("datatype_declaration -> var_list DOS_PUNTOS TIPO_DATO");
+        }
     ;
 
 var_list:
-    ID {RULE("var_list -> ID");}
-    | var_list COMA ID {RULE("var_list -> var_list COMA ID");}
+    ID
+        {
+            crearLista(&aux_declarations);
+            ponerAlFinal(&aux_declarations, $1, strlen($1) + 1);
+            RULE("var_list -> ID");
+        }
+    | var_list COMA ID 
+        {
+            ponerAlFinal(&aux_declarations, $3, strlen($3) + 1);
+            RULE("var_list -> var_list COMA ID");
+        }
     ;
 
 group_of_sentences:
@@ -135,9 +170,9 @@ assignment:
     {
         tTerceto terceto;
         char str_index_cte[20];
-        sprintf(str_index_cte, "%d", index_cte);
+        sprintf(str_index_cte, "[%d]", index_cte);
         
-        agregar_terceto(terceto, &lista_tercetos, $2, $1, str_index_cte);
+        agregar_terceto(terceto, &lista_tercetos, "SIMPLE_ASIG", $1, str_index_cte);
         RULE("assignment -> ID OP_ASIG cte");
     }
     ;
@@ -146,8 +181,8 @@ cte:
     CTE_INT
         {
             tTerceto terceto;
-            char value[50];
-            strcpy(value, yytext);
+            char value[70];
+            sprintf(value,"CTE_INT:%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
             RULE("cte -> CTE_INT");
@@ -155,8 +190,8 @@ cte:
     | CTE_FLOAT 
         {
             tTerceto terceto;
-            char value[50];
-            strcpy(value, yytext);
+            char value[70];
+            sprintf(value,"CTE_FLOAT:%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
             RULE("cte -> CTE_FLOAT");
@@ -164,8 +199,8 @@ cte:
     | CTE_STRING 
         {
             tTerceto terceto;
-            char value[50];
-            strcpy(value, yytext);
+            char value[70];
+            sprintf(value,"CTE_STRING:%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
             RULE("cte -> CTE_STRING");
@@ -178,10 +213,10 @@ selection:
             tTerceto terceto;
 
             char str_index_condition[20];
-            sprintf(str_index_condition, "%d", index_condition);
+            sprintf(str_index_condition, "[%d]", index_condition);
 
             char str_index_false[20];
-            sprintf(str_index_false, "%d", obtener_indice_actual() + 1);
+            sprintf(str_index_false, "[%d]", obtener_indice_actual() + 1);
 
             actualizar_terceto(&lista_tercetos, $1, "JF", str_index_condition, str_index_false);
             RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");
@@ -193,10 +228,10 @@ selection:
             aux_index_jump = agregar_terceto(terceto, &lista_tercetos, "JMP", NULL, NULL);
 
             char str_index_condition[20];
-            sprintf(str_index_condition, "%d", index_condition);
+            sprintf(str_index_condition, "[%d]", index_condition);
 
             char str_index_false[20];
-            sprintf(str_index_false, "%d", obtener_indice_actual() + 1);
+            sprintf(str_index_false, "[%d]", obtener_indice_actual() + 1);
 
             actualizar_terceto(&lista_tercetos, $1, "JF", str_index_condition, str_index_false);
             RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");
@@ -204,7 +239,7 @@ selection:
         CBO group_of_sentences CBC
         {
             char str_index_false[20];
-            sprintf(str_index_false, "%d", obtener_indice_actual() + 1);
+            sprintf(str_index_false, "[%d]", obtener_indice_actual() + 1);
 
             actualizar_terceto(&lista_tercetos, aux_index_jump, "JMP", NULL, str_index_false);
 
@@ -217,7 +252,7 @@ selection_condition:
             tTerceto terceto;
 
             char str_index_condition[20];
-            sprintf(str_index_condition, "%d", index_condition);
+            sprintf(str_index_condition, "[%d]", index_condition);
 
             $$ = agregar_terceto(terceto, &lista_tercetos, "JF", str_index_condition, NULL);
         }
@@ -228,13 +263,13 @@ loop:
             tTerceto terceto;
 
             char str_index_condition[20];    
-            sprintf(str_index_condition,"%d",index_condition);
+            sprintf(str_index_condition,"[%d]",index_condition);
 
             char str_index_false[20];
-            sprintf(str_index_false, "%d", obtener_indice_actual() + 2);
+            sprintf(str_index_false, "[%d]", obtener_indice_actual() + 2);
 
             char str_index_loopback[20];
-            sprintf(str_index_loopback, "%d", $1);
+            sprintf(str_index_loopback, "[%d]", $1);
 
             actualizar_terceto(&lista_tercetos, $1, "JF", str_index_condition, str_index_false);
 
@@ -251,7 +286,7 @@ while_condition:
 
         char str_index_condition[20];
 
-        sprintf(str_index_condition,"%d",index_condition);
+        sprintf(str_index_condition,"[%d]",index_condition);
 
         $$ = agregar_terceto(terceto,&lista_tercetos,"JF",str_index_condition,NULL);        
     }
@@ -270,10 +305,10 @@ condition:
             tTerceto terceto;
 
             char izq[20];
-            sprintf(izq, "%d", index_condition);
+            sprintf(izq, "[%d]", index_condition);
 
             char der[20];
-            sprintf(der, "%d", index_comparison);
+            sprintf(der, "[%d]", index_comparison);
 
             index_condition = agregar_terceto(terceto, &lista_tercetos, $2, izq, der);
             $$ = index_condition;
@@ -284,10 +319,10 @@ condition:
             tTerceto terceto;
 
             char izq[20];
-            sprintf(izq, "%d", index_condition);
+            sprintf(izq, "[%d]", index_condition);
 
             char der[20];
-            sprintf(der, "%d", index_comparison);
+            sprintf(der, "[%d]", index_comparison);
         
             index_condition = agregar_terceto(terceto, &lista_tercetos, $2, izq, der);
             $$ = index_condition;
@@ -298,7 +333,7 @@ condition:
             tTerceto terceto;
 
             char expr[20];
-            sprintf(expr, "%d", index_condition);
+            sprintf(expr, "[%d]", index_condition);
 
             index_condition = agregar_terceto(terceto, &lista_tercetos, $1, expr, NULL);
             $$ = index_condition;
@@ -312,10 +347,10 @@ comparison:
             tTerceto terceto;
 
             char str_left[20];
-            sprintf(str_left, "%d", $1);  // resultado de la izquierda
+            sprintf(str_left, "[%d]", $1);  // resultado de la izquierda
 
             char str_right[20];
-            sprintf(str_right, "%d", $3);       // resultado de la derecha
+            sprintf(str_right, "[%d]", $3);       // resultado de la derecha
 
             index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
             $$ = index_comparison;
@@ -326,10 +361,10 @@ comparison:
             tTerceto terceto;
 
             char str_left[20];
-            sprintf(str_left, "%d", $1);  // resultado de la izquierda
+            sprintf(str_left, "[%d]", $1);  // resultado de la izquierda
 
             char str_right[20];
-            sprintf(str_right, "%d", $3);       // resultado de la derecha
+            sprintf(str_right, "[%d]", $3);       // resultado de la derecha
 
             index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
             $$ = index_comparison;
@@ -340,10 +375,10 @@ comparison:
             tTerceto terceto;
 
             char str_left[20];
-            sprintf(str_left, "%d", $1);  // resultado de la izquierda
+            sprintf(str_left, "[%d]", $1);  // resultado de la izquierda
 
             char str_right[20];
-            sprintf(str_right, "%d", $3);       // resultado de la derecha
+            sprintf(str_right, "[%d]", $3);       // resultado de la derecha
 
             index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
             $$ = index_comparison;
@@ -354,10 +389,10 @@ comparison:
             tTerceto terceto;
 
             char str_left[20];
-            sprintf(str_left, "%d", $1);  // resultado de la izquierda
+            sprintf(str_left, "[%d]", $1);  // resultado de la izquierda
 
             char str_right[20];
-            sprintf(str_right, "%d", $3);       // resultado de la derecha
+            sprintf(str_right, "[%d]", $3);       // resultado de la derecha
 
             index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
             $$ = index_comparison;
@@ -370,9 +405,9 @@ arithmetic_assig:
     {
         tTerceto terceto;
         char str_index_expression[20];
-        sprintf(str_index_expression, "%d", index_expression);
+        sprintf(str_index_expression, "[%d]", index_expression);
         
-        index_arit_assig = agregar_terceto(terceto, &lista_tercetos, $2, $1, str_index_expression);
+        index_arit_assig = agregar_terceto(terceto, &lista_tercetos, "ARIT_ASIG", $1, str_index_expression);
         $$ = index_arit_assig;
 
         RULE("arithmetic_assig -> ID OP_ARIT expression");
@@ -385,10 +420,10 @@ expression:
             tTerceto terceto;
 
             char str_index_expression[20];
-            sprintf(str_index_expression, "%d", index_expression);
+            sprintf(str_index_expression, "[%d]", index_expression);
 
             char str_index_term[20];
-            sprintf(str_index_term, "%d", index_term);
+            sprintf(str_index_term, "[%d]", index_term);
 
             index_expression = agregar_terceto(terceto, &lista_tercetos, $2,str_index_expression, str_index_term);
             $$ = index_expression;
@@ -399,10 +434,10 @@ expression:
             tTerceto terceto;
 
             char str_index_expression[20];
-            sprintf(str_index_expression, "%d", index_expression);
+            sprintf(str_index_expression, "[%d]", index_expression);
 
             char str_index_term[20];
-            sprintf(str_index_term, "%d", index_term);
+            sprintf(str_index_term, "[%d]", index_term);
 
             index_expression = agregar_terceto(terceto, &lista_tercetos, $2,str_index_expression, str_index_term);
             $$ = index_expression;
@@ -422,10 +457,10 @@ term:
             tTerceto terceto;
 
             char str_index_term[20];
-            sprintf(str_index_term, "%d", index_term);
+            sprintf(str_index_term, "[%d]", index_term);
 
             char str_index_factor[20];
-            sprintf(str_index_factor, "%d", index_factor);
+            sprintf(str_index_factor, "[%d]", index_factor);
 
             index_term = agregar_terceto(terceto, &lista_tercetos, $2,str_index_term, str_index_factor);
             $$ = index_term;
@@ -436,10 +471,10 @@ term:
             tTerceto terceto;
 
             char str_index_term[20];
-            sprintf(str_index_term, "%d", index_term);
+            sprintf(str_index_term, "[%d]", index_term);
 
             char str_index_factor[20];
-            sprintf(str_index_factor, "%d", index_factor);
+            sprintf(str_index_factor, "[%d]", index_factor);
 
             index_term = agregar_terceto(terceto, &lista_tercetos, $2,str_index_term, str_index_factor);
             $$ = index_term;
@@ -463,8 +498,8 @@ factor:
     | ID 
         {
             tTerceto terceto;
-            char value[50];
-            strcpy(value, yytext);
+            char value[70];
+            sprintf(value,"%s", yytext);
             index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_factor;
             RULE("factor -> ID");
@@ -472,8 +507,8 @@ factor:
     | CTE_INT 
         {
             tTerceto terceto;
-            char value[50];
-            strcpy(value, yytext);
+            char value[70];
+            sprintf(value,"CTE_INT:%s", yytext);
             index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_factor;
             RULE("factor -> CTE_INT");
@@ -481,8 +516,8 @@ factor:
     | CTE_FLOAT 
         {
             tTerceto terceto;
-            char value[50];
-            strcpy(value, yytext);
+            char value[70];
+            sprintf(value,"CTE_FLOAT:%s", yytext);
             index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_factor;
             RULE("factor -> CTE_FLOAT");
@@ -581,12 +616,11 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
                     yyerror("La cadena final excede los 50 caracteres");
                 }
             }
-
             // Asignar id_destino
             idx_aux = agregar_terceto(terceto, &lista_tercetos, str_final, NULL, NULL);
-            sprintf(str_idx_aux, "%d", idx_aux);
+            sprintf(str_idx_aux, "[%d]", idx_aux);
 
-            agregar_terceto(terceto, &lista_tercetos, ":=", id_destino, str_idx_aux);
+            agregar_terceto(terceto, &lista_tercetos, "SIMPLE_ASIG", id_destino, str_idx_aux);
 
             RULE("sliceAndConcat -> SLICE_AND_CONCAT PA CTE_INT COMA CTE_INT COMA CTE_STRING COMA CTE_STRING COMA CTE_INT PC");
         }
@@ -644,7 +678,7 @@ expressions_list:
             tTerceto terceto;
 
             contador_expresiones_reorder++;
-            sprintf(str_index_expression,"%d", $3);
+            sprintf(str_index_expression,"[%d]", $3);
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
 
             agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
@@ -659,7 +693,7 @@ expressions_list:
             tTerceto terceto;
 
             contador_expresiones_reorder = 0;
-            sprintf(str_index_expression,"%d", $1);
+            sprintf(str_index_expression,"[%d]", $1);
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
 
             agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
@@ -688,8 +722,8 @@ int main(int argc, char *argv[])
 
 	printf("Syntax OK \n");
 
-    symbol_table_to_file("tabla_simbolos.txt", &symbol_table);
-    terceto_to_file("tercetos.txt", &lista_tercetos);
+    symbol_table_to_file("symbol_table.txt", &symbol_table);
+    terceto_to_file("intermediate_code.txt", &lista_tercetos);
     return 0;
 }
 

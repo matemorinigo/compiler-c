@@ -71,8 +71,8 @@ DOS_PUNTOS          ":"
 COMA                ","
 
 /*Constantes*/
-CTE_INT             {OP_RES}?{DIGITO}+
-CTE_FLOAT           {OP_RES}?(({DIGITO}*{PUNTO}{DIGITO}+)|({DIGITO}+{PUNTO}{DIGITO}*))
+CTE_INT             {DIGITO}+
+CTE_FLOAT           (({DIGITO}*{PUNTO}{DIGITO}+)|({DIGITO}+{PUNTO}{DIGITO}*))
 CTE_STRING          \"([^\"\n]|\\\")*\"
 CTE_BOOL            {BOOL}
 
@@ -158,7 +158,10 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
 {IF}                {return IF;}
 {ELSE}              {return ELSE;}
 {INIT}              {return INIT;}
-{TIPO_DATO}         {return TIPO_DATO;}
+{TIPO_DATO}         {
+                        yylval.str_val = strdup(yytext);
+                        return TIPO_DATO;
+                    }
 
 {ID}                {
                         symbol sym;

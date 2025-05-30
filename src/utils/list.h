@@ -26,5 +26,6 @@ void ordenarListaInsercion(tLista* pl,int cmp(const void*,const void*));
 tNodo** buscarMenorLista(tLista* pl, int cmp(const void*,const void*));
 void ordenarListaSeleccion(tLista* pl,int cmp(const void*,const void*));
 int actualizarNodo(tLista* pl, const void* datoBuscar, const void* datoNuevo, size_t tamDato, int cmp(const void*, const void*));
+int buscarElemento(tLista* pl, const void* datoBuscar, void* destino, size_t tamDato, int cmp(const void*, const void*));
 
 #endif // LISTASIMPLEMENTEENLAZADA_H_INCLUDED
