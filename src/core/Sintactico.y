@@ -9,12 +9,12 @@
 #include "terceto.h"
 #include "reorder.h"
 #include "slice_and_concat.h"
-#define SLICE_AND_CONCAT_OK 0
-#define SLICE_AND_CONCAT_ERROR 1
+#include "variable_checks.h"
 
 extern char* yytext;
 
 #define RULE(x) printf("Rule recognized: %s \n", x);
+
 int yyerror(char* e);
 int yystopparser=0;
 tLista symbol_table;
@@ -33,6 +33,9 @@ int aux_index_condition;
 int index_selection;
 int aux_index_jump;
 int contador_expresiones_reorder;
+
+char ult_cte_detectada[50];
+char aux_term[50];
 
 extern int yylex();
 extern int yyparser();
@@ -98,7 +101,11 @@ program:
     ;
 
 declarations: 
-    INIT CBO multiple_datatype_declaration CBC {RULE("declarations -> INIT CBO multiple_datatype_declaration CBC");}
+    INIT CBO multiple_datatype_declaration CBC 
+        {
+            vaciarLista(&aux_declarations);
+            RULE("declarations -> INIT CBO multiple_datatype_declaration CBC");
+        }
     ;
 
 multiple_datatype_declaration:
@@ -112,7 +119,7 @@ datatype_declaration:
             char aux[50];
             while(sacarPrimero(&aux_declarations, aux, sizeof(aux)))
             {
-                update_symbol_data_type(aux, $3, &symbol_table);
+                crear_variable(aux, $3, &symbol_table);
             }
             RULE("datatype_declaration -> var_list DOS_PUNTOS TIPO_DATO");
         }
@@ -154,6 +161,16 @@ assignment:
         tTerceto terceto;
         char str_index_cte[20];
         sprintf(str_index_cte, "[%d]", index_cte);
+
+        if(check_var_exists($1, &symbol_table) == 0){
+            yyerror("ERROR: Variable usada pero no declarada");
+        }
+        char aux_datatype[50];
+        sprintf(aux_datatype, "_%s", ult_cte_detectada);
+
+        if(compare_datatypes($1, aux_datatype, &symbol_table) == DIFFERENT_DATATYPE){
+            yyerror("ERROR: No se puede asignar una constante a una variable de diferente tipo");
+        }
         
         agregar_terceto(terceto, &lista_tercetos, "SIMPLE_ASIG", $1, str_index_cte);
         RULE("assignment -> ID OP_ASIG cte");
@@ -168,6 +185,7 @@ cte:
             sprintf(value,"CTE_INT:%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
+            strcpy(ult_cte_detectada, yytext);
             RULE("cte -> CTE_INT");
         }
     | CTE_FLOAT 
@@ -177,6 +195,7 @@ cte:
             sprintf(value,"CTE_FLOAT:%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
+            strcpy(ult_cte_detectada, yytext);
             RULE("cte -> CTE_FLOAT");
         } 
     | CTE_STRING 
@@ -186,6 +205,7 @@ cte:
             sprintf(value,"CTE_STRING:%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
+            strcpy(ult_cte_detectada, yytext);
             RULE("cte -> CTE_STRING");
         }
     ;
@@ -327,6 +347,7 @@ condition:
 comparison:
     expression MAYOR expression 
         {
+
             tTerceto terceto;
 
             char str_left[20];
@@ -386,6 +407,10 @@ comparison:
 arithmetic_assig:
     ID OP_ARIT expression 
     {
+        if(check_var_exists($1, &symbol_table) == 0){
+            yyerror("ERROR: Variable usada pero no declarada");
+        }
+
         tTerceto terceto;
         char str_index_expression[20];
         sprintf(str_index_expression, "[%d]", index_expression);
@@ -398,9 +423,11 @@ arithmetic_assig:
     ;
 
 expression:
-    expression OP_SUM term 
+    expression OP_SUM term
         {
             tTerceto terceto;
+
+
 
             char str_index_expression[20];
             sprintf(str_index_expression, "[%d]", index_expression);
@@ -412,7 +439,7 @@ expression:
             $$ = index_expression;
             RULE("expression -> expression OP_SUM term");
         }
-    | expression OP_RES term 
+    | expression OP_RES term
         {
             tTerceto terceto;
 
@@ -435,7 +462,8 @@ expression:
     ;
 
 term:
-    term OP_MUL factor 
+    term OP_MUL factor
+
         {
             tTerceto terceto;
 
@@ -449,7 +477,7 @@ term:
             $$ = index_term;
             RULE("term -> term OP_MUL factor");
         }
-    | term OP_DIV factor 
+    | term OP_DIV factor     
         {
             tTerceto terceto;
 
@@ -480,6 +508,10 @@ factor:
         }
     | ID 
         {
+            if(check_var_exists($1, &symbol_table) == 0){
+                yyerror("ERROR: Variable usada pero no declarada");
+            }
+
             tTerceto terceto;
             char value[70];
             sprintf(value,"%s", yytext);
@@ -511,6 +543,14 @@ factor:
 input:
     READ PA ID PC 
         {
+            if(check_var_exists($3, &symbol_table) == 0){
+                yyerror("ERROR: Variable usada pero no declarada");
+            }
+
+            if(check_var_is_string($3, &symbol_table) == IS_NOT_STRING){
+                yyerror("ERROR: La funcion READ debe recibir una variable string");
+            }
+
             tTerceto terceto;
             char var_destino[50];
             strcpy(var_destino, $3);
@@ -534,6 +574,13 @@ output:
         }
     | WRITE PA ID PC
         {
+            if(check_var_exists($3, &symbol_table) == 0){
+                yyerror("ERROR: Variable usada pero no declarada");
+            }
+            if(check_var_is_numeric($3, &symbol_table) == IS_NOT_NUMERIC){
+                yyerror("ERROR: La funcion WRITE debe recibir una variable numerica");
+            }
+
             tTerceto terceto;
             char id_to_print[50];
             strcpy(id_to_print, $3);
@@ -546,6 +593,14 @@ output:
 sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
     ID OP_ASIG_COMUN SLICE_AND_CONCAT PA CTE_INT COMA CTE_INT COMA CTE_STRING COMA CTE_STRING COMA CTE_INT PC 
         {
+            if(check_var_exists($1, &symbol_table) == 0){
+                yyerror("ERROR: Variable usada pero no declarada");
+            }
+
+            if(check_var_is_string($1, &symbol_table) == IS_NOT_STRING){
+                yyerror("ERROR: La funcion sliceAndConcat devuelve un string");
+            }
+
             // Variables Auxiliares
             int idx_aux;
             char str_idx_aux[50];

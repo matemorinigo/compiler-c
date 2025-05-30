@@ -164,13 +164,6 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
                     }
 
 {ID}                {
-                        symbol sym;
-
-                        strcpy(sym.name, yytext);
-                        strcpy(sym.data_type, "");
-                        strcpy(sym.value, "");
-                        sym.length = strlen(yytext);
-                        insert_symbol(sym, &symbol_table);
                         yylval.str_val = strdup(yytext);
                         return ID;
                     }
@@ -210,6 +203,7 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
                             sym.length = strlen(yytext);
                             insert_symbol(sym, &symbol_table);
 
+                            yylval.float_val = value;
                             return CTE_FLOAT;
                         }
                         else {

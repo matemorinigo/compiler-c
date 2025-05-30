@@ -20,9 +20,9 @@ a =: (a + b) * c
 
 write("Programa de prueba integral")
 write("Ingrese un valor para la variable c:")
-read(c)
-write("Valor ingresado:")
-write(c)
+read(apellido)
+
+write(a)
 
 
 if (a > b)
@@ -51,7 +51,7 @@ while (b < a)
 
 resultadoTexto = sliceAndConcat(1, 3, "Hola", "Mundo", 1)
 write("Resultado de sliceAndConcat:")
-write(resultadoTexto)
+write(a)
 
 
 write("Demostrando reorder:")
@@ -77,3 +77,18 @@ if (NOT a < b)
 }
 
 write("Fin del programa") 
+
+
+#+ CASOS DE FALLO +#
+
+#+ Utilizar variable no declarada +#
+#+ j := 10  +#
+
+#+ Asignar un float a un int +#
+#+ b =: 1.2 +#
+
+#+ Input recibe una variable numerica +#
+#+ read(a) +#
+
+#+ sliceAndConcat asigna a un int +#
+#+ a = sliceAndConcat(1, 3, "Hola", "Mundo", 1) +#

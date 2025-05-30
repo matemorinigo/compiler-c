@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#define SLICE_AND_CONCAT_OK 0
-#define SLICE_AND_CONCAT_ERROR 1
+#include "slice_and_concat.h"
 
 int validar_concatenarEnPalabra1(int concatenarEnPalabra1) {
     if (concatenarEnPalabra1 < 0 || concatenarEnPalabra1 > 1) {

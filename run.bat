@@ -2,7 +2,7 @@
 flex .\src\core\Lexico.l
 bison -dyv .\src\core\Sintactico.y
 
-gcc.exe -Isrc/utils lex.yy.c y.tab.c src/utils/symbol.c src/utils/list.c src/utils/terceto.c src/utils/reorder.c src/utils/slice_and_concat.c -o compilador.exe
+gcc.exe -Isrc/utils lex.yy.c y.tab.c src/utils/symbol.c src/utils/list.c src/utils/terceto.c src/utils/reorder.c src/utils/slice_and_concat.c src/utils/variable_checks.c -o compilador.exe
 
 
 compilador.exe tests\test.txt
