@@ -1,7 +1,0 @@
-init {
-    a, b, c : Int
-}
-
-write("ewr")
-write(var1)
-read(base)
