@@ -38,23 +38,6 @@ extern int yylex();
 extern int yyparser();
 extern FILE* yyin;
 
-// Función auxiliar para obtener el tipo de dato de una constante desde un terceto
-char* get_cte_datatype(int terceto_index) {
-    tTerceto terceto;
-    if (!get_terceto(&lista_tercetos, terceto_index, &terceto)) {
-        return NULL;
-    }
-    
-    if (strncmp(terceto.operador, "CTE_INT:", 8) == 0) {
-        return "Int";
-    } else if (strncmp(terceto.operador, "CTE_FLOAT:", 10) == 0) {
-        return "Float";
-    } else if (strncmp(terceto.operador, "CTE_STRING:", 11) == 0) {
-        return "String";
-    }
-    
-    return NULL;
-}
 %}
 
 %union {
