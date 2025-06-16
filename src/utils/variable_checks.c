@@ -65,3 +65,16 @@ int check_var_is_numeric(char* var_name, tLista* symbol_table){
     return IS_NOT_NUMERIC;
 }
 
+int check_var_is_int(char* var_name, tLista* symbol_table){
+    symbol sym;
+    
+    if(!get_symbol_by_name(var_name, &sym, symbol_table)){
+        return IS_NOT_INT; // Variable no existe
+    }
+
+    if(strcmp(sym.data_type, "int") == 0){
+        return IS_INT;
+    }
+    return IS_NOT_INT;
+}
+

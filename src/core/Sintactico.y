@@ -411,6 +411,10 @@ arithmetic_assig:
             yyerror("ERROR: Variable usada pero no declarada");
         }
 
+        if(check_var_is_int($1, &symbol_table) == 0){
+            yyerror("ERROR: No se pueden hacer asignaciones aritmeticas sobre flotantes (es una feature)");
+        }
+
         tTerceto terceto;
         char str_index_expression[20];
         sprintf(str_index_expression, "[%d]", index_expression);
@@ -435,7 +439,7 @@ expression:
             char str_index_term[20];
             sprintf(str_index_term, "[%d]", index_term);
 
-            index_expression = agregar_terceto(terceto, &lista_tercetos, $2,str_index_expression, str_index_term);
+            index_expression = agregar_terceto(terceto, &lista_tercetos, "SUM",str_index_expression, str_index_term);
             $$ = index_expression;
             RULE("expression -> expression OP_SUM term");
         }
@@ -449,7 +453,7 @@ expression:
             char str_index_term[20];
             sprintf(str_index_term, "[%d]", index_term);
 
-            index_expression = agregar_terceto(terceto, &lista_tercetos, $2,str_index_expression, str_index_term);
+            index_expression = agregar_terceto(terceto, &lista_tercetos, "RES",str_index_expression, str_index_term);
             $$ = index_expression;
             RULE("expression -> expression OP_RES term");
         }
@@ -473,7 +477,7 @@ term:
             char str_index_factor[20];
             sprintf(str_index_factor, "[%d]", index_factor);
 
-            index_term = agregar_terceto(terceto, &lista_tercetos, $2,str_index_term, str_index_factor);
+            index_term = agregar_terceto(terceto, &lista_tercetos, "MUL",str_index_term, str_index_factor);
             $$ = index_term;
             RULE("term -> term OP_MUL factor");
         }
@@ -487,7 +491,7 @@ term:
             char str_index_factor[20];
             sprintf(str_index_factor, "[%d]", index_factor);
 
-            index_term = agregar_terceto(terceto, &lista_tercetos, $2,str_index_term, str_index_factor);
+            index_term = agregar_terceto(terceto, &lista_tercetos, "DIV",str_index_term, str_index_factor);
             $$ = index_term;
             RULE("term -> term OP_DIV factor");
         }
@@ -512,6 +516,10 @@ factor:
                 yyerror("ERROR: Variable usada pero no declarada");
             }
 
+            if(check_var_is_int($1, &symbol_table) == 0){
+                yyerror("ERROR: No se puede hacer operaciones aritmeticas con flotantes (es una feature)");
+            }
+
             tTerceto terceto;
             char value[70];
             sprintf(value,"%s", yytext);
@@ -527,15 +535,6 @@ factor:
             index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_factor;
             RULE("factor -> CTE_INT");
-        }
-    | CTE_FLOAT 
-        {
-            tTerceto terceto;
-            char value[70];
-            sprintf(value,"CTE_FLOAT:%s", yytext);
-            index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
-            $$ = index_factor;
-            RULE("factor -> CTE_FLOAT");
         }
     ;
 
@@ -710,6 +709,7 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
 expressions_list:
     expressions_list COMA expression 
         {
+            symbol sym;
             char* nombre_base_variable_aux = "@expr_";
             char nombre_dinamico_variable[50];
             char str_index_expression[50];
@@ -719,12 +719,19 @@ expressions_list:
             sprintf(str_index_expression,"[%d]", $3);
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
 
+            sprintf(sym.name, "%s", nombre_dinamico_variable);
+            strcpy(sym.data_type, "float");
+            strcpy(sym.value, "");
+            sym.length = strlen(nombre_dinamico_variable);
+            insert_symbol(sym, &symbol_table);
+
             agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
 
             RULE("expressions_list -> expressions_list COMA expression");
         }
     | expression 
         {
+            symbol sym;
             char* nombre_base_variable_aux = "@expr_";
             char nombre_dinamico_variable[50];
             char str_index_expression[50];
@@ -733,6 +740,13 @@ expressions_list:
             contador_expresiones_reorder = 0;
             sprintf(str_index_expression,"[%d]", $1);
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
+
+
+            sprintf(sym.name, "%s", nombre_dinamico_variable);
+            strcpy(sym.data_type, "float");
+            strcpy(sym.value, "");
+            sym.length = strlen(nombre_dinamico_variable);
+            insert_symbol(sym, &symbol_table);
 
             agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
 

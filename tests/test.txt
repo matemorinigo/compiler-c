@@ -12,9 +12,7 @@ y := 3.14159
 nombre := "Juan"
 apellido := "Perez"
 
-
 c =: a + b
-x =: x * 2.0
 a =: (a + b) * c
 
 
@@ -55,17 +53,16 @@ write(a)
 
 
 write("Demostrando reorder:")
-reorder([a+5, b*2, c-10, x+y], 1, 0)
+reorder([a+5, b*2, c-10, a+b], 1, 0)
 
 
 if (a >= b OR c >= 20)
 {
     write("Condición evaluada como verdadera")
-    z =: y / 2.0
+    a =: b / c
     
-    while (z > 1.0)
+    while (a > b)
     {
-        z =: z - 0.5
         write(z)
     }
 }
