@@ -1,9 +1,0 @@
-init {
-    a, b : Int
-}
-while (a > b)
-{
-    a =: a + 1
-    b =: b + 7
-}
-
