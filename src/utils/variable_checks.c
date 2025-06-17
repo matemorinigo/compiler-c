@@ -78,3 +78,15 @@ int check_var_is_int(char* var_name, tLista* symbol_table){
     return IS_NOT_INT;
 }
 
+int check_var_is_float(char* var_name, tLista* symbol_table){
+    symbol sym;
+    
+    if(!get_symbol_by_name(var_name, &sym, symbol_table)){
+        return IS_NOT_FLOAT; // Variable no existe
+    }
+
+    if(strcmp(sym.data_type, "float") == 0){
+        return IS_FLOAT;
+    }
+    return IS_NOT_FLOAT;
+}

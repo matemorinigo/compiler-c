@@ -171,8 +171,14 @@ assignment:
         if(compare_datatypes($1, aux_datatype, &symbol_table) == DIFFERENT_DATATYPE){
             yyerror("ERROR: No se puede asignar una constante a una variable de diferente tipo");
         }
-        
-        agregar_terceto(terceto, &lista_tercetos, "SIMPLE_ASIG", $1, str_index_cte);
+
+        if (check_var_is_int($1, &symbol_table))
+            agregar_terceto(terceto, &lista_tercetos, "INT_ASIG", $1, str_index_cte);
+        else if (check_var_is_float($1, &symbol_table))
+            agregar_terceto(terceto, &lista_tercetos, "FLOAT_ASIG", $1, str_index_cte);
+        else
+            agregar_terceto(terceto, &lista_tercetos, "STRING_ASIG", $1, str_index_cte);
+
         RULE("assignment -> ID OP_ASIG cte");
     }
     ;
@@ -182,7 +188,7 @@ cte:
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"CTE_INT:%s", yytext);
+            sprintf(value,"_%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
             strcpy(ult_cte_detectada, yytext);
@@ -192,7 +198,7 @@ cte:
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"CTE_FLOAT:%s", yytext);
+            sprintf(value,"_%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
             strcpy(ult_cte_detectada, yytext);
@@ -202,7 +208,7 @@ cte:
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"CTE_STRING:%s", yytext);
+            sprintf(value,"_%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
             strcpy(ult_cte_detectada, yytext);
@@ -531,7 +537,7 @@ factor:
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"CTE_INT:%s", yytext);
+            sprintf(value,"_%s", yytext);
             index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_factor;
             RULE("factor -> CTE_INT");
@@ -657,7 +663,7 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
             idx_aux = agregar_terceto(terceto, &lista_tercetos, str_final, NULL, NULL);
             sprintf(str_idx_aux, "[%d]", idx_aux);
 
-            agregar_terceto(terceto, &lista_tercetos, "SIMPLE_ASIG", id_destino, str_idx_aux);
+            agregar_terceto(terceto, &lista_tercetos, "STRING_ASIG", id_destino, str_idx_aux);
 
             RULE("sliceAndConcat -> SLICE_AND_CONCAT PA CTE_INT COMA CTE_INT COMA CTE_STRING COMA CTE_STRING COMA CTE_INT PC");
         }
