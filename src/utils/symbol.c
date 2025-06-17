@@ -52,8 +52,12 @@ void write_header(const char* output_file) {
     fclose(file);
 }
 
-
 void symbol_table_to_file(char* output_file, tLista* symbol_table){
     write_header(output_file);
     recorrerLista(symbol_table, put_in_file, output_file);
+}
+
+int get_symbol_by_index(unsigned index, symbol* symbol_destino, tLista* symbol_table)
+{
+    return obtenerElemento(symbol_table, symbol_destino, sizeof(symbol), index);
 }

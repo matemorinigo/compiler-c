@@ -178,7 +178,7 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
                         if(value >= INT16_MIN && value <= INT16_MAX) {
                             symbol sym;
 
-                            snprintf(sym.name, sizeof(sym.name), "_%s", yytext);
+                            snprintf(sym.name, sizeof(sym.name), "T_%s", yytext);
                             strcpy(sym.data_type, "int");
                             strcpy(sym.value, yytext);
                             sym.length = strlen(yytext);
@@ -197,7 +197,7 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
                         {
                             symbol sym;
 
-                            snprintf(sym.name, sizeof(sym.name), "_%s", yytext);
+                            snprintf(sym.name, sizeof(sym.name), "T_%s", yytext);
                             strcpy(sym.data_type, "float");
                             strcpy(sym.value, yytext);
                             sym.length = strlen(yytext);
@@ -214,7 +214,7 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
                         if (strlen(yytext) <= 50){
                             symbol sym;
 
-                            snprintf(sym.name, sizeof(sym.name), "_%s", yytext);
+                            snprintf(sym.name, sizeof(sym.name), "T_%s", yytext);
                             strcpy(sym.data_type, "string");
                             strcpy(sym.value, yytext);
                             sym.length = strlen(yytext);

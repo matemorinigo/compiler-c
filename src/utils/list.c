@@ -280,3 +280,15 @@ int buscarElemento(tLista* pl, const void* datoBuscar, void* destino, size_t tam
     memcpy(destino, (*pl)->dato, MIN(tamDato, (*pl)->tamDato));
     return 1;
 }
+
+int obtenerElemento(tLista* pl, void* destino, size_t tamDato, unsigned pos)
+{
+    while (*pl && pos--)
+        pl = &(*pl)->siguiente;
+
+    if (*pl == NULL)
+        return 0;
+
+    memcpy(destino, (*pl)->dato, MIN(tamDato, (*pl)->tamDato));
+    return 1;
+}

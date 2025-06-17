@@ -10,6 +10,7 @@
 #include "reorder.h"
 #include "slice_and_concat.h"
 #include "variable_checks.h"
+#include "assembler.h"
 
 extern char* yytext;
 
@@ -94,7 +95,7 @@ extern FILE* yyin;
 %%
 
 start:
-    program
+    program {generarAssembler(&symbol_table);}
 
 program:
     declarations group_of_sentences {RULE("program -> declarations group_of_sentences");}
@@ -166,9 +167,11 @@ assignment:
             yyerror("ERROR: Variable usada pero no declarada");
         }
         char aux_datatype[50];
-        sprintf(aux_datatype, "_%s", ult_cte_detectada);
+        sprintf(aux_datatype, "T_%s", ult_cte_detectada);
 
         if(compare_datatypes($1, aux_datatype, &symbol_table) == DIFFERENT_DATATYPE){
+            printf("id: %s\n", $1);
+            printf("cte: %s\n", aux_datatype);
             yyerror("ERROR: No se puede asignar una constante a una variable de diferente tipo");
         }
 
@@ -188,7 +191,7 @@ cte:
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"_%s", yytext);
+            sprintf(value,"T_%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
             strcpy(ult_cte_detectada, yytext);
@@ -198,7 +201,7 @@ cte:
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"_%s", yytext);
+            sprintf(value,"T_%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
             strcpy(ult_cte_detectada, yytext);
@@ -208,7 +211,7 @@ cte:
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"_%s", yytext);
+            sprintf(value,"T_%s", yytext);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
             strcpy(ult_cte_detectada, yytext);
@@ -537,7 +540,7 @@ factor:
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"_%s", yytext);
+            sprintf(value,"T_%s", yytext);
             index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_factor;
             RULE("factor -> CTE_INT");
@@ -677,7 +680,7 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
             int inicio_ordenamiento;
             int fin_ordenamiento;
             tTerceto terceto;
-            char* nombre_base_variable_aux = "@expr_";
+            char* nombre_base_variable_aux = "interna_@expr_";
             char nombre_dinamico_variable[50];
             int contador;
 
@@ -716,7 +719,7 @@ expressions_list:
     expressions_list COMA expression 
         {
             symbol sym;
-            char* nombre_base_variable_aux = "@expr_";
+            char* nombre_base_variable_aux = "interna_@expr_";
             char nombre_dinamico_variable[50];
             char str_index_expression[50];
             tTerceto terceto;
@@ -726,8 +729,8 @@ expressions_list:
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
 
             sprintf(sym.name, "%s", nombre_dinamico_variable);
-            strcpy(sym.data_type, "float");
-            strcpy(sym.value, "");
+            strcpy(sym.data_type, "int");
+            strcpy(sym.value, "0");
             sym.length = strlen(nombre_dinamico_variable);
             insert_symbol(sym, &symbol_table);
 
@@ -738,7 +741,7 @@ expressions_list:
     | expression 
         {
             symbol sym;
-            char* nombre_base_variable_aux = "@expr_";
+            char* nombre_base_variable_aux = "interna_@expr_";
             char nombre_dinamico_variable[50];
             char str_index_expression[50];
             tTerceto terceto;
@@ -749,8 +752,8 @@ expressions_list:
 
 
             sprintf(sym.name, "%s", nombre_dinamico_variable);
-            strcpy(sym.data_type, "float");
-            strcpy(sym.value, "");
+            strcpy(sym.data_type, "int");
+            strcpy(sym.value, "0");
             sym.length = strlen(nombre_dinamico_variable);
             insert_symbol(sym, &symbol_table);
 
