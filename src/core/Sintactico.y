@@ -513,13 +513,7 @@ term:
     ;
 
 factor:
-    PA expression PC 
-        {
-            index_factor = index_expression;
-            $$ = index_factor;
-            RULE("factor -> PA expression PC");
-        }
-    | ID 
+    ID 
         {
             if(check_var_exists($1, &symbol_table) == 0){
                 yyerror("ERROR: Variable usada pero no declarada");
