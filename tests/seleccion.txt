@@ -1,0 +1,13 @@
+init {
+    a, b : Int
+    x : Float
+    c : String
+}
+
+
+write("PROBANDO SELECCION:")
+write("Ingrese un valor para a:")
+read(a)
+write("Ingrese un valor para b:")
+read(b)
+

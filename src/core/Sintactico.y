@@ -853,6 +853,10 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
             sym.length = strlen(str_final);
             insert_symbol(sym, &symbol_table);
 
+            int ind_aux = agregar_terceto(terceto, &lista_tercetos, "VAR_STRING", sym.name, NULL);
+            char str_ind_aux[50];
+            sprintf(str_ind_aux,"[%d]", ind_aux);
+
             agregar_terceto(terceto, &lista_tercetos, "STRING_ASIG", id_destino, sym.name);
 
             RULE("sliceAndConcat -> SLICE_AND_CONCAT PA CTE_INT COMA CTE_INT COMA CTE_STRING COMA CTE_STRING COMA CTE_INT PC");

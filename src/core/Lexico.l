@@ -32,9 +32,6 @@ OP_DIV              "/"
 
 /*Comparadores*/
 MAYOR               ">"
-MAYOR_IGUAL         ">="
-MENOR               "<"
-MENOR_IGUAL         "<="
 
 /*Operadores logicos*/
 AND                 "AND"
@@ -113,18 +110,6 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
 {MAYOR}             {
                         yylval.str_val = strdup(yytext);
                         return MAYOR;
-                    }
-{MAYOR_IGUAL}       {
-                        yylval.str_val = strdup(yytext);
-                        return MAYOR_IGUAL;
-                    }
-{MENOR}             {
-                        yylval.str_val = strdup(yytext);
-                        return MENOR;
-                    }
-{MENOR_IGUAL}       {
-                        yylval.str_val = strdup(yytext);
-                        return MENOR_IGUAL;
                     }
 
 

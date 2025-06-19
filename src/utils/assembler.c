@@ -164,6 +164,7 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
         
         indice++;
     }
+	fprintf(arch, "terceto_%d:\n", indice);
 	escribirFinal(arch);
 	fclose(arch);
 /*
