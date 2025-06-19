@@ -96,7 +96,7 @@ extern FILE* yyin;
 %%
 
 start:
-    program {generarAssembler(&symbol_table);}
+    program {generarAssembler(&symbol_table, &lista_tercetos);}
 
 program:
     declarations group_of_sentences {RULE("program -> declarations group_of_sentences");}
@@ -168,7 +168,7 @@ assignment:
             yyerror("ERROR: Variable usada pero no declarada");
         }
         char aux_datatype[50];
-        sprintf(aux_datatype, "T_%s", ult_cte_detectada);
+        sprintf(aux_datatype, "%s", ult_cte_detectada);
 
         if(compare_datatypes($1, aux_datatype, &symbol_table) == DIFFERENT_DATATYPE){
             printf("id: %s\n", $1);
@@ -192,20 +192,23 @@ cte:
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"T_%s", yytext);
-            index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            sprintf(value,"I_%s", yytext);
+            index_cte = agregar_terceto(terceto, &lista_tercetos, "VAR_INT", value, NULL);
             $$ = index_cte;
-            strcpy(ult_cte_detectada, yytext);
+            sprintf(ult_cte_detectada,"I_%s", yytext);
             RULE("cte -> CTE_INT");
         }
     | CTE_FLOAT 
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"T_%s", yytext);
-            index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            char valor_limpio[70];
+            strcpy(valor_limpio,yytext);
+            sanitize_string(valor_limpio);
+            sprintf(value,"F_%s", valor_limpio);
+            index_cte = agregar_terceto(terceto, &lista_tercetos, "VAR_FLOAT", value, NULL);
             $$ = index_cte;
-            strcpy(ult_cte_detectada, yytext);
+            sprintf(ult_cte_detectada,"F_%s", valor_limpio);
             RULE("cte -> CTE_FLOAT");
         } 
     | CTE_STRING 
@@ -213,9 +216,9 @@ cte:
             tTerceto terceto;
             char value[70];
             sprintf(value,"%s", $1);
-            index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            index_cte = agregar_terceto(terceto, &lista_tercetos, "VAR_STRING", value, NULL);
             $$ = index_cte;
-            strcpy(ult_cte_detectada, yytext);
+            strcpy(ult_cte_detectada, $1);
             RULE("cte -> CTE_STRING");
         }
     ;
@@ -567,8 +570,7 @@ expression:
     expression OP_SUM term
         {
             tTerceto terceto;
-
-
+            symbol sym;
 
             char str_index_expression[20];
             sprintf(str_index_expression, "[%d]", index_expression);
@@ -577,12 +579,20 @@ expression:
             sprintf(str_index_term, "[%d]", index_term);
 
             index_expression = agregar_terceto(terceto, &lista_tercetos, "SUM",str_index_expression, str_index_term);
+
+            snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_expression);
+            strcpy(sym.data_type, "int");
+            strcpy(sym.value, "");
+            sym.length = 0;
+            insert_symbol(sym, &symbol_table);
+
             $$ = index_expression;
             RULE("expression -> expression OP_SUM term");
         }
     | expression OP_RES term
         {
             tTerceto terceto;
+            symbol sym;
 
             char str_index_expression[20];
             sprintf(str_index_expression, "[%d]", index_expression);
@@ -591,6 +601,13 @@ expression:
             sprintf(str_index_term, "[%d]", index_term);
 
             index_expression = agregar_terceto(terceto, &lista_tercetos, "RES",str_index_expression, str_index_term);
+
+            snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_expression);
+            strcpy(sym.data_type, "int");
+            strcpy(sym.value, "");
+            sym.length = 0;
+            insert_symbol(sym, &symbol_table);
+
             $$ = index_expression;
             RULE("expression -> expression OP_RES term");
         }
@@ -606,6 +623,7 @@ term:
     term OP_MUL factor
 
         {
+            symbol sym;
             tTerceto terceto;
 
             char str_index_term[20];
@@ -615,11 +633,19 @@ term:
             sprintf(str_index_factor, "[%d]", index_factor);
 
             index_term = agregar_terceto(terceto, &lista_tercetos, "MUL",str_index_term, str_index_factor);
+
+            snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_term);
+            strcpy(sym.data_type, "int");
+            strcpy(sym.value, "");
+            sym.length = 0;
+            insert_symbol(sym, &symbol_table);
+
             $$ = index_term;
             RULE("term -> term OP_MUL factor");
         }
     | term OP_DIV factor     
         {
+            symbol sym;
             tTerceto terceto;
 
             char str_index_term[20];
@@ -629,6 +655,14 @@ term:
             sprintf(str_index_factor, "[%d]", index_factor);
 
             index_term = agregar_terceto(terceto, &lista_tercetos, "DIV",str_index_term, str_index_factor);
+
+            snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_term);
+            strcpy(sym.data_type, "int");
+            strcpy(sym.value, "");
+            sym.length = 0;
+            insert_symbol(sym, &symbol_table);
+
+
             $$ = index_term;
             RULE("term -> term OP_DIV factor");
         }
@@ -643,6 +677,7 @@ term:
 factor:
     ID 
         {
+            symbol sym;
             if(check_var_exists($1, &symbol_table) == 0){
                 yyerror("ERROR: Variable usada pero no declarada");
             }
@@ -654,16 +689,33 @@ factor:
             tTerceto terceto;
             char value[70];
             sprintf(value,"%s", yytext);
-            index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            index_factor = agregar_terceto(terceto, &lista_tercetos, "INT_OP", value, NULL);
+
+            snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_factor);
+            strcpy(sym.data_type, "int");
+            strcpy(sym.value, "");
+            sym.length = 0;
+            insert_symbol(sym, &symbol_table);
+
+
             $$ = index_factor;
             RULE("factor -> ID");
         }
     | CTE_INT 
         {
             tTerceto terceto;
+            symbol sym;
+
             char value[70];
-            sprintf(value,"T_%s", yytext);
-            index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+            sprintf(value,"I_%s", yytext);
+            index_factor = agregar_terceto(terceto, &lista_tercetos, "INT_OP", value, NULL);
+
+            snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_factor);
+            strcpy(sym.data_type, "int");
+            strcpy(sym.value, "");
+            sym.length = 0;
+            insert_symbol(sym, &symbol_table);
+
             $$ = index_factor;
             RULE("factor -> CTE_INT");
         }
@@ -677,15 +729,20 @@ input:
                 yyerror("ERROR: Variable usada pero no declarada");
             }
 
-            if(check_var_is_string($3, &symbol_table) == IS_NOT_STRING){
-                yyerror("ERROR: La funcion READ debe recibir una variable string");
-            }
-
             tTerceto terceto;
             char var_destino[50];
             strcpy(var_destino, $3);
 
-            agregar_terceto(terceto, &lista_tercetos, "READ", var_destino, NULL);
+            if(check_var_is_string($3, &symbol_table) == IS_STRING){
+                agregar_terceto(terceto, &lista_tercetos, "READ_STRING", var_destino, NULL);
+            }
+            else if(check_var_is_int($3, &symbol_table) == IS_INT){
+                agregar_terceto(terceto, &lista_tercetos, "READ_INT", var_destino, NULL);
+            }
+            else if(check_var_is_float($3, &symbol_table) == IS_FLOAT){
+                agregar_terceto(terceto, &lista_tercetos, "READ_FLOAT", var_destino, NULL);
+            }
+            
 
             RULE("input -> READ PA ID PC");
         }
@@ -707,15 +764,18 @@ output:
             if(check_var_exists($3, &symbol_table) == 0){
                 yyerror("ERROR: Variable usada pero no declarada");
             }
-            if(check_var_is_numeric($3, &symbol_table) == IS_NOT_NUMERIC){
-                yyerror("ERROR: La funcion WRITE debe recibir una variable numerica");
-            }
 
             tTerceto terceto;
             char id_to_print[50];
             strcpy(id_to_print, $3);
 
-            agregar_terceto(terceto, &lista_tercetos, "PRINT_VAR", id_to_print, NULL);
+            if(check_var_is_int($3, &symbol_table) == IS_INT){
+                agregar_terceto(terceto, &lista_tercetos, "PRINT_INT", id_to_print, NULL);
+            }
+            else if(check_var_is_float($3, &symbol_table) == IS_FLOAT){
+                agregar_terceto(terceto, &lista_tercetos, "PRINT_FLOAT", id_to_print, NULL);
+            }
+            
             RULE("output -> WRITE PA ID PC");
         }
     ;
@@ -810,6 +870,37 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
             char* nombre_base_variable_aux = "interna_expr_";
             char nombre_dinamico_variable[50];
             int contador;
+            symbol sym;
+
+            strcpy(sym.name, "min_");
+            strcpy(sym.data_type, "int");
+            strcpy(sym.value, "0");
+            sym.length = 0;
+            insert_symbol(sym, &symbol_table);
+
+            strcpy(sym.name, "aux_");
+            strcpy(sym.data_type, "int");
+            strcpy(sym.value, "0");
+            sym.length = 0;
+            insert_symbol(sym, &symbol_table);
+
+            strcpy(sym.name, "T_corchete_abre");
+            strcpy(sym.data_type, "string");
+            strcpy(sym.value, "\"[\"");
+            sym.length = 1;
+            insert_symbol(sym, &symbol_table);
+
+            strcpy(sym.name, "T_corchete_cierra");
+            strcpy(sym.data_type, "string");
+            strcpy(sym.value, "\"]\"");
+            sym.length = 1;
+            insert_symbol(sym, &symbol_table);
+
+            strcpy(sym.name, "T_coma");
+            strcpy(sym.data_type, "string");
+            strcpy(sym.value, "\",\"");
+            sym.length = 1;
+            insert_symbol(sym, &symbol_table);
 
             //Validaciones
             if (direccion < 0 && direccion > 1)

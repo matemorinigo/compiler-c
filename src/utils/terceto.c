@@ -46,8 +46,7 @@ void terceto_to_file(char* output_file, tLista* terceto_lista){
     fclose(file);
 }
 
-int actualizar_terceto(tLista* terceto_lista, int indice, char* operador, char* op1, char* op2)
-{
+int actualizar_terceto(tLista* terceto_lista, int indice, char* operador, char* op1, char* op2){
     tTerceto tercetoBuscar = { .indice = indice };
     tTerceto tercetoNuevo = { .indice = indice };
     strcpy(tercetoNuevo.operador, operador);
@@ -57,15 +56,13 @@ int actualizar_terceto(tLista* terceto_lista, int indice, char* operador, char* 
     return actualizarNodo(terceto_lista, &tercetoBuscar, &tercetoNuevo, sizeof(tTerceto), cmp_terceto);
 }
 
-int get_terceto(tLista* terceto_lista, int indice, tTerceto* terceto_destino)
-{
+int get_terceto(tLista* terceto_lista, int indice, tTerceto* terceto_destino){
     tTerceto tercetoBuscar = { .indice = indice };
     
     return buscarElemento(terceto_lista, &tercetoBuscar, terceto_destino, sizeof(tTerceto), cmp_terceto);
 }
 
-int actualizar_op2(tLista* terceto_lista, int indice, char* op2)
-{
+int actualizar_op2(tLista* terceto_lista, int indice, char* op2){
     tTerceto tercetoActual;
     
     // Primero obtenemos el terceto actual
@@ -83,3 +80,86 @@ int actualizar_op2(tLista* terceto_lista, int indice, char* op2)
     return actualizarNodo(terceto_lista, &tercetoBuscar, &tercetoNuevo, sizeof(tTerceto), cmp_terceto);
 }
 
+int get_terceto_para_asm(tLista* terceto_lista, int indice, tTerceto* terceto_destino){
+    tTerceto tercetoBuscar = { .indice = indice };
+    buscarElemento(terceto_lista, &tercetoBuscar, terceto_destino, sizeof(tTerceto), cmp_terceto);
+    char operador[50];
+
+    if(strcmp(terceto_destino->operador, "ARIT_ASIG") == 0){
+        if(strchr(terceto_destino->op2, '[') != NULL){
+            return ARIT_ASIG_INDEX;
+        } else {
+            return ARIT_ASIG_SIMPLE;
+        }
+    }
+    if(strcmp(terceto_destino->operador, "VAR_INT") == 0){
+        return VAR_INT;
+    }
+    if(strcmp(terceto_destino->operador, "VAR_FLOAT") == 0){
+        return VAR_FLOAT;
+    }
+    if(strcmp(terceto_destino->operador, "VAR_STRING") == 0){
+        return VAR_STRING;
+    }
+    if(strcmp(terceto_destino->operador, "SUM") == 0){
+        return SUM;
+    }
+    if(strcmp(terceto_destino->operador, "RES") == 0){
+        return RES;
+    }
+    if(strcmp(terceto_destino->operador, "MUL") == 0){
+        return MUL;
+    }
+    if(strcmp(terceto_destino->operador, "DIV") == 0){
+        return DIV;
+    }
+    if(strcmp(terceto_destino->operador, "STRING_ASIG") == 0){
+        return STRING_ASIG;
+    }
+    if(strcmp(terceto_destino->operador, "FLOAT_ASIG") == 0){
+        return FLOAT_ASIG;
+    }
+    if(strcmp(terceto_destino->operador, "INT_ASIG") == 0){
+        return INT_ASIG;
+    }
+    if(strcmp(terceto_destino->operador, "CMP") == 0){
+        return CMP;
+    }
+    if(strcmp(terceto_destino->operador, "BLE") == 0){
+        return BLE;
+    }
+    if(strcmp(terceto_destino->operador, "BGT") == 0){
+        return BGT;
+    }
+    if(strcmp(terceto_destino->operador, "BGE") == 0){
+        return BGE;
+    }
+    if(strcmp(terceto_destino->operador, "BI") == 0){
+        return BI;
+    }
+    if(strcmp(terceto_destino->operador, "INT_OP") == 0){
+        return INT_OP;
+    }
+    if(strcmp(terceto_destino->operador, "READ_STRING") == 0){
+        return READ_STRING;
+    }
+    if(strcmp(terceto_destino->operador, "READ_INT") == 0){
+        return READ_INT;
+    }
+    if(strcmp(terceto_destino->operador, "READ_FLOAT") == 0){
+        return READ_FLOAT;
+    }
+    if(strcmp(terceto_destino->operador, "PRINT_INT") == 0){
+        return PRINT_INT;
+    }
+    if(strcmp(terceto_destino->operador, "PRINT_FLOAT") == 0){
+        return PRINT_FLOAT;
+    }
+    if(strcmp(terceto_destino->operador, "PRINT_STR") == 0){
+        return PRINT_STR;
+    }
+    if(strcmp(terceto_destino->operador, "PRINT_CTE_STR") == 0){
+        return PRINT_CTE_STR;
+    }
+    return -1;
+}

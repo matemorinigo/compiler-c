@@ -6,18 +6,18 @@ void crear_print_tercetos(int contador, int contador_expresiones_reorder, const 
 {
     tTerceto terceto;
     char nombre_dinamico_variable[50];
-    agregar_terceto(terceto, lista_tercetos, "PRINT_STR", "[", NULL);
+    agregar_terceto(terceto, lista_tercetos, "PRINT_STR", "T_corchete_abre", NULL);
     contador = 0;
     //Printeamos todas las expresiones que caen antes del pivote
-    while(contador <= contador_expresiones_reorder)
+    while(contador < contador_expresiones_reorder)
     {
         contador++;
         sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador);
-        agregar_terceto(terceto, lista_tercetos, "PRINT_VAR", nombre_dinamico_variable, NULL);
+        agregar_terceto(terceto, lista_tercetos, "PRINT_INT", nombre_dinamico_variable, NULL);
         if(contador <= contador_expresiones_reorder)
-            agregar_terceto(terceto, lista_tercetos, "PRINT_STR", ",", NULL);
+            agregar_terceto(terceto, lista_tercetos, "PRINT_STR", "T_coma", NULL);
     }
-    agregar_terceto(terceto, lista_tercetos, "PRINT_STR", "]", NULL);
+    agregar_terceto(terceto, lista_tercetos, "PRINT_STR", "T_corchete_cierra", NULL);
 
 }
 

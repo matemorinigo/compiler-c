@@ -78,7 +78,7 @@ int get_value_by_name(char* name, char* value_destino, tLista* symbol_table) {
 
 void sanitize_string(char* str) {
     for (int i = 0; str[i] != '\0'; i++) {
-        if (!isalpha(str[i])) {
+        if (!isalnum(str[i])) {
             str[i] = '_';
         }
     }
