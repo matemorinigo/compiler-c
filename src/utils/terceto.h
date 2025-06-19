@@ -15,4 +15,5 @@ void terceto_to_file(char* output_file, tLista* terceto_lista);
 int obtener_indice_actual();
 int actualizar_terceto(tLista* terceto_lista, int indice, char* operador, char* op1, char* op2);
 int get_terceto(tLista* terceto_lista, int indice, tTerceto* terceto_destino);
+int actualizar_op2(tLista* terceto_lista, int indice, char* op2);
 #endif // TERCETO_H

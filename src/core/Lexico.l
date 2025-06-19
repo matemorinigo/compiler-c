@@ -215,12 +215,13 @@ COMM                {OPEN_COMM}.*{CLOSE_COMM}
                             symbol sym;
 
                             snprintf(sym.name, sizeof(sym.name), "T_%s", yytext);
+                            sanitize_string(sym.name);
                             strcpy(sym.data_type, "string");
                             strcpy(sym.value, yytext);
                             sym.length = strlen(yytext);
                             insert_symbol(sym, &symbol_table);
 
-                            yylval.str_val = strdup(yytext);
+                            yylval.str_val = strdup(sym.name);
                             return CTE_STRING;
                         }
                         else {

@@ -21,6 +21,8 @@ int yystopparser=0;
 tLista symbol_table;
 tLista lista_tercetos;
 tLista aux_declarations;
+tLista aux_conditions;
+tLista aux_else;
 
 int index_cte;
 int index_assignment;
@@ -32,7 +34,6 @@ int index_comparison;
 int index_condition;
 int aux_index_condition;
 int index_selection;
-int aux_index_jump;
 int contador_expresiones_reorder;
 
 char ult_cte_detectada[50];
@@ -56,7 +57,7 @@ extern FILE* yyin;
 %left <str_val> AND OR
 %right <str_val> NOT
 
-%type <int_val> expression factor term arithmetic_assig cte comparison condition selection selection_condition loop while_condition
+%type <int_val> expression factor term arithmetic_assig cte condition selection loop
 
 %start start
 
@@ -211,7 +212,7 @@ cte:
         {
             tTerceto terceto;
             char value[70];
-            sprintf(value,"T_%s", yytext);
+            sprintf(value,"%s", $1);
             index_cte = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
             $$ = index_cte;
             strcpy(ult_cte_detectada, yytext);
@@ -220,198 +221,325 @@ cte:
     ;
 
 selection:
-    selection_condition CBO group_of_sentences CBC
+    IF PA condition PC CBO group_of_sentences CBC
         {
             tTerceto terceto;
-
             char str_index_condition[20];
-            sprintf(str_index_condition, "[%d]", index_condition);
-
             char str_index_false[20];
             sprintf(str_index_false, "[%d]", obtener_indice_actual() + 1);
 
-            actualizar_terceto(&lista_tercetos, $1, "JF", str_index_condition, str_index_false);
+
+            int ind_aux;
+
+            switch ($3){
+                case 1:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+                    break;
+
+                case 2:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+                    break;
+
+                case 3:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+                    break;
+
+                case 4:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+                    break;
+            }
             RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");
         }
-    | selection_condition CBO group_of_sentences CBC ELSE 
+    | IF PA condition PC CBO group_of_sentences CBC ELSE 
         {
             tTerceto terceto;
-
-            aux_index_jump = agregar_terceto(terceto, &lista_tercetos, "JMP", NULL, NULL);
-
             char str_index_condition[20];
-            sprintf(str_index_condition, "[%d]", index_condition);
-
             char str_index_false[20];
-            sprintf(str_index_false, "[%d]", obtener_indice_actual() + 1);
+            sprintf(str_index_false, "[%d]", obtener_indice_actual() + 2);
+            int ind_aux;
 
-            actualizar_terceto(&lista_tercetos, $1, "JF", str_index_condition, str_index_false);
-            RULE("selection -> IF PA condition PC CBO group_of_sentences CBC");
+            switch ($3){
+                case 1:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+                    break;
+
+                case 2:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+                    break;
+
+                case 3:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+                    break;
+
+                case 4:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+                    break;
+            }
+
+            int aux_index_bi = agregar_terceto(terceto, &lista_tercetos, "BI", NULL, NULL);
+            ponerAlInicio(&aux_else, &aux_index_bi, sizeof(aux_index_bi));
         }
         CBO group_of_sentences CBC
         {
+            int aux_index_bi;
             char str_index_false[20];
             sprintf(str_index_false, "[%d]", obtener_indice_actual() + 1);
 
-            actualizar_terceto(&lista_tercetos, aux_index_jump, "JMP", NULL, str_index_false);
+            sacarPrimero(&aux_else, &aux_index_bi, sizeof(aux_index_bi));
+            actualizar_terceto(&lista_tercetos, aux_index_bi, "BI", NULL, str_index_false);
 
             RULE("selection -> IF PA condition PC CBO group_of_sentences CBC ELSE CBO group_of_sentences CBC");
-        }
-
-selection_condition:
-    IF PA condition PC
-        {
-            tTerceto terceto;
-
-            char str_index_condition[20];
-            sprintf(str_index_condition, "[%d]", index_condition);
-
-            $$ = agregar_terceto(terceto, &lista_tercetos, "JF", str_index_condition, NULL);
+            
         }
 
 loop:
-    while_condition CBO group_of_sentences CBC 
+    WHILE PA condition PC CBO group_of_sentences CBC 
         {
             tTerceto terceto;
-
-            char str_index_condition[20];    
-            sprintf(str_index_condition,"[%d]",index_condition);
-
+            char str_index_condition[20];
             char str_index_false[20];
             sprintf(str_index_false, "[%d]", obtener_indice_actual() + 2);
-
             char str_index_loopback[20];
-            sprintf(str_index_loopback, "[%d]", $1);
+        
 
-            actualizar_terceto(&lista_tercetos, $1, "JF", str_index_condition, str_index_false);
+            int ind_aux;
 
-            /*Fijarse si vuelve a str_index_loopback o tiene que retorceder mas*/
-            $$ = agregar_terceto(terceto,&lista_tercetos,"BI",str_index_loopback,NULL); 
-            
+            switch ($3){
+                case 1:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+
+                    sprintf(str_index_loopback, "[%d]", ind_aux - 1);
+
+                    break;
+
+                case 2:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+
+                    sprintf(str_index_loopback, "[%d]", ind_aux - 1);
+
+                    break;
+
+                case 3:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+
+                    sprintf(str_index_loopback, "[%d]", ind_aux - 3);
+
+                    break;
+
+                case 4:
+                    sacarPrimero(&aux_conditions, &ind_aux, sizeof(ind_aux));
+                    sprintf(str_index_condition, "[%d]", ind_aux);
+                    actualizar_op2(&lista_tercetos, ind_aux, str_index_false);
+
+                    sprintf(str_index_loopback, "[%d]", ind_aux - 1);
+
+                    break;
+            }
+
+            $$ = agregar_terceto(terceto,&lista_tercetos,"BI", NULL,str_index_loopback); 
             RULE("loop -> WHILE PA condition PC CBO group_of_sentences CBC ");
         }
     ;
-while_condition:
-    WHILE PA condition PC
-    {
-        tTerceto terceto;
-
-        char str_index_condition[20];
-
-        sprintf(str_index_condition,"[%d]",index_condition);
-
-        $$ = agregar_terceto(terceto,&lista_tercetos,"JF",str_index_condition,NULL);        
-    }
-    ;
-
 
 condition:
-    comparison 
-        {
-            index_condition = index_comparison;
-            $$ = index_condition;
-            RULE("condition -> comparison");
-        }
-    | condition AND comparison 
+    ID MAYOR ID
         {
             tTerceto terceto;
+            char aux_index_condition[50];
 
-            char izq[20];
-            sprintf(izq, "[%d]", index_condition);
+            if(!check_var_exists($1, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
+            if(!check_var_exists($3, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
+            if(!check_var_is_int($1, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_int($3, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
 
-            char der[20];
-            sprintf(der, "[%d]", index_comparison);
+            char str_left[50];
+            sprintf(str_left, "%s", $1);  // resultado de la izquierda
 
-            index_condition = agregar_terceto(terceto, &lista_tercetos, $2, izq, der);
-            $$ = index_condition;
-            RULE("condition -> condition AND comparison");
+            char str_right[50];
+            sprintf(str_right, "%s", $3);       // resultado de la derecha
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "CMP", str_left, str_right);
+            sprintf(aux_index_condition, "[%d]", index_condition);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "BLE", aux_index_condition, "");
+            ponerAlInicio(&aux_conditions, &index_condition, sizeof(index_condition));
+
+            $$ = 1;
+
+            RULE("condition -> ID MAYOR ID");
         }
-    | condition OR comparison 
+    | ID MAYOR ID AND ID MAYOR ID
         {
             tTerceto terceto;
+            char aux_index_condition[50];
 
-            char izq[20];
-            sprintf(izq, "[%d]", index_condition);
+            if(!check_var_exists($1, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
+            if(!check_var_exists($3, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
+            if(!check_var_exists($5, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
+            if(!check_var_exists($7, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
 
-            char der[20];
-            sprintf(der, "[%d]", index_comparison);
-        
-            index_condition = agregar_terceto(terceto, &lista_tercetos, $2, izq, der);
-            $$ = index_condition;
-            RULE("condition -> condition OR comparison");
+            if(!check_var_is_int($1, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_int($3, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_int($5, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_int($7, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
+
+            char first_id[50];
+            sprintf(first_id, "%s", $1);
+
+            char second_id[50];
+            sprintf(second_id, "%s", $3);
+
+            char third_id[50];
+            sprintf(third_id, "%s", $5);
+
+            char fourth_id[50];
+            sprintf(fourth_id, "%s", $7);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "CMP", first_id, second_id);
+            sprintf(aux_index_condition, "[%d]", index_condition);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "BLE", aux_index_condition, "");
+            ponerAlInicio(&aux_conditions, &index_condition, sizeof(index_condition));
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "CMP", third_id, fourth_id);
+            sprintf(aux_index_condition, "[%d]", index_condition);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "BLE", aux_index_condition, "");
+            ponerAlInicio(&aux_conditions, &index_condition, sizeof(index_condition));
+
+            $$ = 2;
         }
-    | NOT condition 
+    | ID MAYOR ID OR ID MAYOR ID
         {
             tTerceto terceto;
+            char aux_index_condition[50];
+            char aux_index_salto[50];
 
-            char expr[20];
-            sprintf(expr, "[%d]", index_condition);
+            if(!check_var_exists($1, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
+            if(!check_var_exists($3, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
+            if(!check_var_exists($5, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
+            if(!check_var_exists($7, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
 
-            index_condition = agregar_terceto(terceto, &lista_tercetos, $1, expr, NULL);
-            $$ = index_condition;
-            RULE("condition -> NOT condition");
+            if(!check_var_is_int($1, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_int($3, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_int($5, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_int($7, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
+
+            char first_id[50];
+            sprintf(first_id, "%s", $1);
+
+            char second_id[50];
+            sprintf(second_id, "%s", $3);
+
+            char third_id[50];
+            sprintf(third_id, "%s", $5);
+
+            char fourth_id[50];
+            sprintf(fourth_id, "%s", $7);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "CMP", first_id, second_id);
+            sprintf(aux_index_condition, "[%d]", index_condition);
+            sprintf(aux_index_salto, "[%d]", index_condition+4);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "BGT", aux_index_condition, aux_index_salto);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "CMP", third_id, fourth_id);
+            sprintf(aux_index_condition, "[%d]", index_condition);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "BLE", aux_index_condition, "");
+            ponerAlInicio(&aux_conditions, &index_condition, sizeof(index_condition));
+
+
+            $$ = 3;
         }
-    ;
-
-comparison:
-    expression MAYOR expression 
-        {
-
-            tTerceto terceto;
-
-            char str_left[20];
-            sprintf(str_left, "[%d]", $1);  // resultado de la izquierda
-
-            char str_right[20];
-            sprintf(str_right, "[%d]", $3);       // resultado de la derecha
-
-            index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
-            $$ = index_comparison;
-            RULE("comparison -> expression MAYOR expression");
-        }
-    | expression MAYOR_IGUAL expression 
-        {
-            tTerceto terceto;
-
-            char str_left[20];
-            sprintf(str_left, "[%d]", $1);  // resultado de la izquierda
-
-            char str_right[20];
-            sprintf(str_right, "[%d]", $3);       // resultado de la derecha
-
-            index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
-            $$ = index_comparison;
-            RULE("comparison -> expression MAYOR_IGUAL expression");
-        }
-    | expression MENOR_IGUAL expression 
-        {
-            tTerceto terceto;
-
-            char str_left[20];
-            sprintf(str_left, "[%d]", $1);  // resultado de la izquierda
-
-            char str_right[20];
-            sprintf(str_right, "[%d]", $3);       // resultado de la derecha
-
-            index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
-            $$ = index_comparison;
-            RULE("comparison -> expression MENOR_IGUAL expression");
-        }
-    | expression MENOR expression 
+    | NOT ID MAYOR ID
         {
             tTerceto terceto;
+            char aux_index_condition[50];
 
-            char str_left[20];
-            sprintf(str_left, "[%d]", $1);  // resultado de la izquierda
+            if(!check_var_exists($2, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
+            if(!check_var_exists($4, &symbol_table))
+                yyerror("Error: variable usada pero no decalarada");
 
-            char str_right[20];
-            sprintf(str_right, "[%d]", $3);       // resultado de la derecha
+            if(!check_var_is_int($2, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_int($4, &symbol_table))
+                yyerror("Error: Solo se pueden comparar enteros");
 
-            index_comparison = agregar_terceto(terceto, &lista_tercetos, $2, str_left, str_right);
-            $$ = index_comparison;
-            RULE("comparison -> expression MENOR expression");
+            char str_left[50];
+            sprintf(str_left, "%s", $2);  // resultado de la izquierda
+
+            char str_right[50];
+            sprintf(str_right, "%s", $4);       // resultado de la derecha
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "CMP", str_left, str_right);
+            sprintf(aux_index_condition, "[%d]", index_condition);
+
+            index_condition = agregar_terceto(terceto, &lista_tercetos, "BGT", aux_index_condition, "");
+            ponerAlInicio(&aux_conditions, &index_condition, sizeof(index_condition));
+
+            $$ = 4;
+
+            RULE("condition -> ID MAYOR ID");
         }
-    ;
 
 arithmetic_assig:
     ID OP_ARIT expression 
@@ -616,8 +744,8 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
             char palabra1[50];
             char palabra2[50];
             char str_final[50];
-            strcpy(palabra1, $9);
-            strcpy(palabra2, $11);
+            get_value_by_name($9, palabra1, &symbol_table);
+            get_value_by_name($11, palabra2, &symbol_table);
 
             eliminar_caracter(palabra1, '"');
             eliminar_caracter(palabra2, '"');
@@ -628,7 +756,7 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
             //Validar
             if(validar_concatenarEnPalabra1(concatenarEnPalabra1) == SLICE_AND_CONCAT_ERROR)
             {
-                yyerror("valor de concatenarEnPalabra1 inválida, debe ser 0 o 1");
+                yyerror("valor de concatenarEnPalabra1 inválido, debe ser 0 o 1");
             }
             
             // Generar str_final
@@ -657,10 +785,15 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
                 }
             }
             // Asignar id_destino
-            idx_aux = agregar_terceto(terceto, &lista_tercetos, str_final, NULL, NULL);
-            sprintf(str_idx_aux, "[%d]", idx_aux);
+            symbol sym;
+            snprintf(sym.name, sizeof(sym.name), "T_%s", str_final);
+            sanitize_string(sym.name);
+            strcpy(sym.data_type, "string");
+            strcpy(sym.value, str_final);
+            sym.length = strlen(str_final);
+            insert_symbol(sym, &symbol_table);
 
-            agregar_terceto(terceto, &lista_tercetos, "STRING_ASIG", id_destino, str_idx_aux);
+            agregar_terceto(terceto, &lista_tercetos, "STRING_ASIG", id_destino, sym.name);
 
             RULE("sliceAndConcat -> SLICE_AND_CONCAT PA CTE_INT COMA CTE_INT COMA CTE_STRING COMA CTE_STRING COMA CTE_INT PC");
         }
@@ -674,7 +807,7 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
             int inicio_ordenamiento;
             int fin_ordenamiento;
             tTerceto terceto;
-            char* nombre_base_variable_aux = "interna_@expr_";
+            char* nombre_base_variable_aux = "interna_expr_";
             char nombre_dinamico_variable[50];
             int contador;
 
@@ -713,7 +846,7 @@ expressions_list:
     expressions_list COMA expression 
         {
             symbol sym;
-            char* nombre_base_variable_aux = "interna_@expr_";
+            char* nombre_base_variable_aux = "interna_expr_";
             char nombre_dinamico_variable[50];
             char str_index_expression[50];
             tTerceto terceto;
@@ -728,14 +861,14 @@ expressions_list:
             sym.length = strlen(nombre_dinamico_variable);
             insert_symbol(sym, &symbol_table);
 
-            agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
+            agregar_terceto(terceto, &lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, str_index_expression);
 
             RULE("expressions_list -> expressions_list COMA expression");
         }
     | expression 
         {
             symbol sym;
-            char* nombre_base_variable_aux = "interna_@expr_";
+            char* nombre_base_variable_aux = "interna_expr_";
             char nombre_dinamico_variable[50];
             char str_index_expression[50];
             tTerceto terceto;
@@ -751,7 +884,7 @@ expressions_list:
             sym.length = strlen(nombre_dinamico_variable);
             insert_symbol(sym, &symbol_table);
 
-            agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
+            agregar_terceto(terceto, &lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, str_index_expression);
 
             RULE("expressions_list -> expression");
         }
@@ -770,6 +903,8 @@ int main(int argc, char *argv[])
     }
     create_symbol_table(&symbol_table);
     init_tercetos(&lista_tercetos);
+    crearLista(&aux_conditions);
+    crearLista(&aux_else);
 
     int parserResult = yyparse();
 

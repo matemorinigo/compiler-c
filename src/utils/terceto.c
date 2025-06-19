@@ -64,3 +64,22 @@ int get_terceto(tLista* terceto_lista, int indice, tTerceto* terceto_destino)
     return buscarElemento(terceto_lista, &tercetoBuscar, terceto_destino, sizeof(tTerceto), cmp_terceto);
 }
 
+int actualizar_op2(tLista* terceto_lista, int indice, char* op2)
+{
+    tTerceto tercetoActual;
+    
+    // Primero obtenemos el terceto actual
+    if (get_terceto(terceto_lista, indice, &tercetoActual) == 0) {
+        return -1; // Error: terceto no encontrado
+    }
+    
+    // Creamos el terceto actualizado manteniendo los valores existentes
+    tTerceto tercetoBuscar = { .indice = indice };
+    tTerceto tercetoNuevo = { .indice = indice };
+    strcpy(tercetoNuevo.operador, tercetoActual.operador);
+    strcpy(tercetoNuevo.op1, tercetoActual.op1);
+    strcpy(tercetoNuevo.op2, op2 == NULL ? "NULL" : op2);
+
+    return actualizarNodo(terceto_lista, &tercetoBuscar, &tercetoNuevo, sizeof(tTerceto), cmp_terceto);
+}
+

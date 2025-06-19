@@ -109,13 +109,28 @@ void generarTabla(FILE *arch, tLista* symbol_table){
         fprintf(arch, "%s ", sym.name);
 
         if(strcmp(sym.data_type, "int") == 0){
-            fprintf(arch, "dd %s\n", sym.value);
+			if(strcmp(sym.value, "") == 0){
+				fprintf(arch, "dd ?\n");
+			}
+			else{
+				fprintf(arch, "dd %s\n", sym.value);
+			}
         }
         else if(strcmp(sym.data_type, "float") == 0){
-            fprintf(arch, "dd %s\n", sym.value);
+			if(strcmp(sym.value, "") == 0){
+				fprintf(arch, "dd ?\n");
+			}
+			else{
+				fprintf(arch, "dd %s\n", sym.value);
+			}
         }
         else if(strcmp(sym.data_type, "string") == 0){
-            fprintf(arch, "db %s, '$'\n", sym.value);
+			if(strcmp(sym.value, "") == 0){
+				fprintf(arch, "db 50 dup(' ')\n");
+			}
+			else{
+				fprintf(arch, "db %s, '$', %d dup(' ')\n", sym.value, 50 - sym.length + 2 - 1);
+			}
         }
         else{
             fprintf(arch, "dd ?\n");

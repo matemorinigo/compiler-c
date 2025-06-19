@@ -36,9 +36,7 @@ void crear_tercetor_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, 
 
             //El primer elemento es el minimo
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, i);
-            idx_var = agregar_terceto(terceto, lista_tercetos, nombre_dinamico_variable, NULL, NULL);
-            sprintf(str_idx_var,"[%d]",idx_var);
-            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "@min", str_idx_var);
+            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "min_", nombre_dinamico_variable);
 
             for(int j = i+1; j < fin_ordenamiento; j++)
             {
@@ -48,56 +46,38 @@ void crear_tercetor_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, 
                 char str_idx_cond_para_JF[50];
                 sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, j);
 
-                // Pongo la variable min en un terceto
-                idx_min = agregar_terceto(terceto, lista_tercetos, "@min", NULL, NULL);
-                sprintf(str_idx_min,"[%d]",idx_min);
-
-                // Pongo la variable dinamica en un terceto
-                idx_var = agregar_terceto(terceto, lista_tercetos, nombre_dinamico_variable, NULL, NULL);
-                sprintf(str_idx_var,"[%d]",idx_var);
-
                 // Comparo var < min
-                idx_cond = agregar_terceto(terceto, lista_tercetos, "<", str_idx_var, str_idx_min);
+                idx_cond = agregar_terceto(terceto, lista_tercetos, "CMP", nombre_dinamico_variable, "min_");
                 sprintf(str_idx_cond,"[%d]",idx_cond);
 
                 // Si min es menor, salto a despues de la asignacion
                 sprintf(str_idx_cond_para_JF,"[%d]",idx_cond + 6);
-                agregar_terceto(terceto, lista_tercetos, "JF", str_idx_cond, str_idx_cond_para_JF);
+                agregar_terceto(terceto, lista_tercetos, "BGE", str_idx_cond, str_idx_cond_para_JF);
 
                 //// Si var es menor, intercambio
 
                 //aux = min
-                agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "@aux", str_idx_min);
+                agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "aux_", "min_");
 
                 //min = var
-                agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "@min", str_idx_var);
+                agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "min_", nombre_dinamico_variable);
 
                 //var = aux
-                idx_aux = agregar_terceto(terceto, lista_tercetos, "@aux", NULL, NULL);
-                sprintf(str_idx_aux,"[%d]",idx_aux);
-
-                agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, str_idx_aux);
+                agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, "aux_");
             }
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, i);
 
             //// Intercambio la variable actual con el minimo
             //aux = min
-            idx_min = agregar_terceto(terceto, lista_tercetos, "@min", NULL, NULL);
-            sprintf(str_idx_min,"[%d]",idx_min);
 
-            idx_aux = agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "@aux", str_idx_min);
+            idx_aux = agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "aux_", "min_");
             sprintf(str_idx_aux,"[%d]",idx_aux);
 
             //min = var
-            idx_var = agregar_terceto(terceto, lista_tercetos, nombre_dinamico_variable, NULL, NULL);
-            sprintf(str_idx_var,"[%d]",idx_var);
-
-            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "@min", str_idx_var);
+            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "min_", nombre_dinamico_variable);
 
             //var = aux
-            idx_aux = agregar_terceto(terceto, lista_tercetos, "@aux", NULL, NULL);
-            sprintf(str_idx_aux,"[%d]",idx_aux);
-            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, str_idx_aux);
+            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, "aux_");
 
         }
 }

@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include "symbol.h"
 #include "list.h"
 
 void put_in_file(void* s, void* output_file);
 int cmp_symbols_by_name(const void* s1, const void* s2);
+void sanitize_symbol_name(void* s, void* unused);
+void sanitize_string(char* str);
 
 void put_in_file(void* s, void* output_file){
 
@@ -60,4 +63,32 @@ void symbol_table_to_file(char* output_file, tLista* symbol_table){
 int get_symbol_by_index(unsigned index, symbol* symbol_destino, tLista* symbol_table)
 {
     return obtenerElemento(symbol_table, symbol_destino, sizeof(symbol), index);
+}
+
+int get_value_by_name(char* name, char* value_destino, tLista* symbol_table) {
+    symbol found_symbol;
+    
+    if (get_symbol_by_name(name, &found_symbol, symbol_table) == 1) {
+        strcpy(value_destino, found_symbol.value);
+        return 1; // Símbolo encontrado
+    }
+    
+    return 0; // Símbolo no encontrado
+}
+
+void sanitize_string(char* str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (!isalpha(str[i])) {
+            str[i] = '_';
+        }
+    }
+}
+
+void sanitize_symbol_name(void* s, void* unused) {
+    symbol* sym = (symbol*)s;
+    sanitize_string(sym->name);
+}
+
+void sanitize_all_symbol_names(tLista* symbol_table) {
+    recorrerLista(symbol_table, sanitize_symbol_name, NULL);
 }
