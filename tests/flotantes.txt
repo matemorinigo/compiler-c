@@ -2,6 +2,15 @@ init {
     a, b, c : Float
 }
 
-write("Escribe un valor para c")
-read(c)
-write(c)
+write("Escribe un valor para a")
+read(a)
+write("Escribe un valor para b")
+read(b)
+
+if(b > a){
+    write("b es mayor que a")
+}
+else{
+    write("b NO es mayor que a")
+}
+

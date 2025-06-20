@@ -36,7 +36,7 @@ void crear_tercetor_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, 
 
             //El primer elemento es el minimo
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, i);
-            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "min_", nombre_dinamico_variable);
+            agregar_terceto(terceto, lista_tercetos, ":=", "min_", nombre_dinamico_variable);
 
             for(int j = i+1; j < fin_ordenamiento; j++)
             {
@@ -57,27 +57,20 @@ void crear_tercetor_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, 
                 //// Si var es menor, intercambio
 
                 //aux = min
-                agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "aux_", "min_");
+                agregar_terceto(terceto, lista_tercetos, ":=", "aux_", "min_");
 
                 //min = var
-                agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "min_", nombre_dinamico_variable);
+                agregar_terceto(terceto, lista_tercetos, ":=", "min_", nombre_dinamico_variable);
 
                 //var = aux
-                agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, "aux_");
+                agregar_terceto(terceto, lista_tercetos, ":=", nombre_dinamico_variable, "aux_");
             }
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, i);
 
             //// Intercambio la variable actual con el minimo
-            //aux = min
-
-            //idx_aux = agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "aux_", "min_");
-            //sprintf(str_idx_aux,"[%d]",idx_aux);
-
-            //min = var
-            //agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "min_", nombre_dinamico_variable);
 
             //var = aux
-            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, "min_");
+            agregar_terceto(terceto, lista_tercetos, ":=", nombre_dinamico_variable, "min_");
 
         }
 }

@@ -17,6 +17,8 @@ extern char* yytext;
 #define RULE(x) printf("Rule recognized: %s \n", x);
 
 int yyerror(char* e);
+int semantic_error(char* e);
+int sintactic_error(char* e);
 int yystopparser=0;
 tLista symbol_table;
 tLista lista_tercetos;
@@ -121,7 +123,10 @@ datatype_declaration:
             char aux[50];
             while(sacarPrimero(&aux_declarations, aux, sizeof(aux)))
             {
-                crear_variable(aux, $3, &symbol_table);
+                if (crear_variable(aux, $3, &symbol_table) == -1)
+                {
+                    sintactic_error("Error: variable ya declarada");
+                }
             }
             RULE("datatype_declaration -> var_list DOS_PUNTOS TIPO_DATO");
         }
@@ -161,11 +166,9 @@ assignment:
     ID OP_ASIG cte 
     {
         tTerceto terceto;
-        char str_index_cte[20];
-        sprintf(str_index_cte, "[%d]", index_cte);
 
         if(check_var_exists($1, &symbol_table) == 0){
-            yyerror("ERROR: Variable usada pero no declarada");
+            sintactic_error("ERROR: Variable usada pero no declarada");
         }
         char aux_datatype[50];
         sprintf(aux_datatype, "%s", ult_cte_detectada);
@@ -173,15 +176,12 @@ assignment:
         if(compare_datatypes($1, aux_datatype, &symbol_table) == DIFFERENT_DATATYPE){
             printf("id: %s\n", $1);
             printf("cte: %s\n", aux_datatype);
-            yyerror("ERROR: No se puede asignar una constante a una variable de diferente tipo");
+            semantic_error("ERROR: No se puede asignar una constante a una variable de diferente tipo");
         }
 
-        if (check_var_is_int($1, &symbol_table))
-            agregar_terceto(terceto, &lista_tercetos, "INT_ASIG", $1, str_index_cte);
-        else if (check_var_is_float($1, &symbol_table))
-            agregar_terceto(terceto, &lista_tercetos, "FLOAT_ASIG", $1, str_index_cte);
-        else
-            agregar_terceto(terceto, &lista_tercetos, "STRING_ASIG", $1, str_index_cte);
+
+        agregar_terceto(terceto, &lista_tercetos, ":=", $1, ult_cte_detectada);
+
 
         RULE("assignment -> ID OP_ASIG cte");
     }
@@ -193,8 +193,7 @@ cte:
             tTerceto terceto;
             char value[70];
             sprintf(value,"I_%s", yytext);
-            index_cte = agregar_terceto(terceto, &lista_tercetos, "VAR_INT", value, NULL);
-            $$ = index_cte;
+
             sprintf(ult_cte_detectada,"I_%s", yytext);
             RULE("cte -> CTE_INT");
         }
@@ -206,8 +205,7 @@ cte:
             strcpy(valor_limpio,yytext);
             sanitize_string(valor_limpio);
             sprintf(value,"F_%s", valor_limpio);
-            index_cte = agregar_terceto(terceto, &lista_tercetos, "VAR_FLOAT", value, NULL);
-            $$ = index_cte;
+
             sprintf(ult_cte_detectada,"F_%s", valor_limpio);
             RULE("cte -> CTE_FLOAT");
         } 
@@ -216,8 +214,7 @@ cte:
             tTerceto terceto;
             char value[70];
             sprintf(value,"%s", $1);
-            index_cte = agregar_terceto(terceto, &lista_tercetos, "VAR_STRING", value, NULL);
-            $$ = index_cte;
+
             strcpy(ult_cte_detectada, $1);
             RULE("cte -> CTE_STRING");
         }
@@ -388,13 +385,17 @@ condition:
             char aux_index_condition[50];
 
             if(!check_var_exists($1, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
             if(!check_var_exists($3, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
-            if(!check_var_is_int($1, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
-            if(!check_var_is_int($3, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
+                sintactic_error("Error: variable usada pero no decalarada");
+            if(!check_var_is_numeric($1, &symbol_table))
+                sintactic_error("Error: Solo se pueden comparar variables numericas");
+            if(!check_var_is_numeric($3, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+
+            if(compare_datatypes($1, $3, &symbol_table) == DIFFERENT_DATATYPE){
+                semantic_error("Error: No se pueden comparar variables de diferente tipo");
+            }
 
             char str_left[50];
             sprintf(str_left, "%s", $1);  // resultado de la izquierda
@@ -418,22 +419,30 @@ condition:
             char aux_index_condition[50];
 
             if(!check_var_exists($1, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
             if(!check_var_exists($3, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
             if(!check_var_exists($5, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
             if(!check_var_exists($7, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
 
-            if(!check_var_is_int($1, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
-            if(!check_var_is_int($3, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
-            if(!check_var_is_int($5, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
-            if(!check_var_is_int($7, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_numeric($1, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+            if(!check_var_is_numeric($3, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+            if(!check_var_is_numeric($5, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+            if(!check_var_is_numeric($7, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+
+            if(compare_datatypes($1, $3, &symbol_table) == DIFFERENT_DATATYPE){
+                semantic_error("Error: No se pueden comparar variables de diferente tipo");
+            }
+
+            if(compare_datatypes($5, $7, &symbol_table) == DIFFERENT_DATATYPE){
+                semantic_error("Error: No se pueden comparar variables de diferente tipo");
+            }
 
             char first_id[50];
             sprintf(first_id, "%s", $1);
@@ -468,22 +477,30 @@ condition:
             char aux_index_salto[50];
 
             if(!check_var_exists($1, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
             if(!check_var_exists($3, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
             if(!check_var_exists($5, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
             if(!check_var_exists($7, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
 
-            if(!check_var_is_int($1, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
-            if(!check_var_is_int($3, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
-            if(!check_var_is_int($5, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
-            if(!check_var_is_int($7, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_numeric($1, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+            if(!check_var_is_numeric($3, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+            if(!check_var_is_numeric($5, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+            if(!check_var_is_numeric($7, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+
+            if(compare_datatypes($1, $3, &symbol_table) == DIFFERENT_DATATYPE){
+                semantic_error("Error: No se pueden comparar variables de diferente tipo");
+            }
+
+            if(compare_datatypes($5, $7, &symbol_table) == DIFFERENT_DATATYPE){
+                semantic_error("Error: No se pueden comparar variables de diferente tipo");
+            }
 
             char first_id[50];
             sprintf(first_id, "%s", $1);
@@ -518,14 +535,18 @@ condition:
             char aux_index_condition[50];
 
             if(!check_var_exists($2, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
             if(!check_var_exists($4, &symbol_table))
-                yyerror("Error: variable usada pero no decalarada");
+                sintactic_error("Error: variable usada pero no decalarada");
 
-            if(!check_var_is_int($2, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
-            if(!check_var_is_int($4, &symbol_table))
-                yyerror("Error: Solo se pueden comparar enteros");
+            if(!check_var_is_numeric($2, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+            if(!check_var_is_numeric($4, &symbol_table))
+                sintactic_error("Error: Solo se pueden variables numericas");
+
+            if(compare_datatypes($2, $4, &symbol_table) == DIFFERENT_DATATYPE){
+                semantic_error("Error: No se pueden comparar variables de diferente tipo");
+            }
 
             char str_left[50];
             sprintf(str_left, "%s", $2);  // resultado de la izquierda
@@ -548,18 +569,14 @@ arithmetic_assig:
     ID OP_ARIT expression 
     {
         if(check_var_exists($1, &symbol_table) == 0){
-            yyerror("ERROR: Variable usada pero no declarada");
-        }
-
-        if(check_var_is_int($1, &symbol_table) == 0){
-            yyerror("ERROR: No se pueden hacer asignaciones aritmeticas sobre flotantes (es una feature)");
+            sintactic_error("ERROR: Variable usada pero no declarada");
         }
 
         tTerceto terceto;
         char str_index_expression[20];
         sprintf(str_index_expression, "[%d]", index_expression);
         
-        index_arit_assig = agregar_terceto(terceto, &lista_tercetos, "ARIT_ASIG", $1, str_index_expression);
+        index_arit_assig = agregar_terceto(terceto, &lista_tercetos, "=:", $1, str_index_expression);
         $$ = index_arit_assig;
 
         RULE("arithmetic_assig -> ID OP_ARIT expression");
@@ -569,19 +586,31 @@ arithmetic_assig:
 expression:
     expression OP_SUM term
         {
-            tTerceto terceto;
             symbol sym;
+            tTerceto terceto;
+            char var_aux_base[50] = "aux_var_";
+            char nombre_expr_aux[50];
+            char nombre_term_aux[50];
 
             char str_index_expression[20];
             sprintf(str_index_expression, "[%d]", index_expression);
+            sprintf(nombre_expr_aux,"%s%d", var_aux_base, index_expression);
 
             char str_index_term[20];
             sprintf(str_index_term, "[%d]", index_term);
+            sprintf(nombre_term_aux,"%s%d", var_aux_base, index_term);
 
             index_expression = agregar_terceto(terceto, &lista_tercetos, "SUM",str_index_expression, str_index_term);
 
             snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_expression);
-            strcpy(sym.data_type, "int");
+
+            if(check_var_is_int(nombre_expr_aux, &symbol_table)){
+                strcpy(sym.data_type, "int");
+            }
+            else if(check_var_is_float(nombre_expr_aux, &symbol_table)){
+                strcpy(sym.data_type, "float");
+            }
+
             strcpy(sym.value, "");
             sym.length = 0;
             insert_symbol(sym, &symbol_table);
@@ -591,19 +620,32 @@ expression:
         }
     | expression OP_RES term
         {
-            tTerceto terceto;
             symbol sym;
+            tTerceto terceto;
+            char var_aux_base[50] = "aux_var_";
+            char nombre_expr_aux[50];
+            char nombre_term_aux[50];
+            
 
             char str_index_expression[20];
             sprintf(str_index_expression, "[%d]", index_expression);
+            sprintf(nombre_expr_aux,"%s%d", var_aux_base, index_expression);
 
             char str_index_term[20];
             sprintf(str_index_term, "[%d]", index_term);
+            sprintf(nombre_term_aux,"%s%d", var_aux_base, index_term);
 
             index_expression = agregar_terceto(terceto, &lista_tercetos, "RES",str_index_expression, str_index_term);
 
             snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_expression);
-            strcpy(sym.data_type, "int");
+
+            if(check_var_is_int(nombre_expr_aux, &symbol_table)){
+                strcpy(sym.data_type, "int");
+            }
+            else if(check_var_is_float(nombre_expr_aux, &symbol_table)){
+                strcpy(sym.data_type, "float");
+            }
+            
             strcpy(sym.value, "");
             sym.length = 0;
             insert_symbol(sym, &symbol_table);
@@ -625,17 +667,37 @@ term:
         {
             symbol sym;
             tTerceto terceto;
+            char var_aux_base[50] = "aux_var_";
+            char nombre_term_aux[50];
+            char nombre_factor_aux[50];
+
 
             char str_index_term[20];
             sprintf(str_index_term, "[%d]", index_term);
+            sprintf(nombre_term_aux,"%s%d", var_aux_base, index_term);
+
 
             char str_index_factor[20];
             sprintf(str_index_factor, "[%d]", index_factor);
+            sprintf(nombre_factor_aux,"%s%d", var_aux_base, index_factor);
+
+            if(compare_datatypes(nombre_factor_aux, nombre_term_aux, &symbol_table) == DIFFERENT_DATATYPE){
+                printf("%s\n", nombre_factor_aux);
+                printf("%s\n", nombre_term_aux);
+                semantic_error("Error: No se puede operar entre variables de diferente tipo");
+            }
 
             index_term = agregar_terceto(terceto, &lista_tercetos, "MUL",str_index_term, str_index_factor);
 
-            snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_term);
-            strcpy(sym.data_type, "int");
+            snprintf(sym.name, sizeof(sym.name), "%s%d", var_aux_base, index_term);
+
+            if(check_var_is_int(nombre_factor_aux, &symbol_table)){
+                strcpy(sym.data_type, "int");
+            }
+            else if(check_var_is_float(nombre_factor_aux, &symbol_table)){
+                strcpy(sym.data_type, "float");
+            }
+
             strcpy(sym.value, "");
             sym.length = 0;
             insert_symbol(sym, &symbol_table);
@@ -647,21 +709,38 @@ term:
         {
             symbol sym;
             tTerceto terceto;
+            char var_aux_base[50] = "aux_var_";
+            char nombre_term_aux[50];
+            char nombre_factor_aux[50];
+
 
             char str_index_term[20];
             sprintf(str_index_term, "[%d]", index_term);
+            sprintf(nombre_term_aux,"%s%d", var_aux_base, index_term);
+
 
             char str_index_factor[20];
             sprintf(str_index_factor, "[%d]", index_factor);
+            sprintf(nombre_factor_aux,"%s%d", var_aux_base, index_factor);
+
+            if(compare_datatypes(nombre_factor_aux, nombre_term_aux, &symbol_table) == DIFFERENT_DATATYPE){
+                semantic_error("Error: No se puede operar entre variables de diferente tipo");
+            }
 
             index_term = agregar_terceto(terceto, &lista_tercetos, "DIV",str_index_term, str_index_factor);
 
-            snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_term);
-            strcpy(sym.data_type, "int");
+            snprintf(sym.name, sizeof(sym.name), "%s%d", var_aux_base, index_term);
+
+            if(check_var_is_int(nombre_factor_aux, &symbol_table)){
+                strcpy(sym.data_type, "int");
+            }
+            else if(check_var_is_float(nombre_factor_aux, &symbol_table)){
+                strcpy(sym.data_type, "float");
+            }
+
             strcpy(sym.value, "");
             sym.length = 0;
             insert_symbol(sym, &symbol_table);
-
 
             $$ = index_term;
             RULE("term -> term OP_DIV factor");
@@ -679,20 +758,27 @@ factor:
         {
             symbol sym;
             if(check_var_exists($1, &symbol_table) == 0){
-                yyerror("ERROR: Variable usada pero no declarada");
+                sintactic_error("ERROR: Variable usada pero no declarada");
             }
 
-            if(check_var_is_int($1, &symbol_table) == 0){
-                yyerror("ERROR: No se puede hacer operaciones aritmeticas con flotantes (es una feature)");
+            if(check_var_is_string($1, &symbol_table)){
+                sintactic_error("ERROR: No se puede hacer operaciones aritmeticas con strings");
             }
 
             tTerceto terceto;
             char value[70];
             sprintf(value,"%s", yytext);
-            index_factor = agregar_terceto(terceto, &lista_tercetos, "INT_OP", value, NULL);
+            index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
 
             snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_factor);
-            strcpy(sym.data_type, "int");
+
+            if(check_var_is_int($1, &symbol_table)){
+                strcpy(sym.data_type, "int");
+            }
+            if(check_var_is_float($1, &symbol_table)){
+                strcpy(sym.data_type, "float");
+            }
+
             strcpy(sym.value, "");
             sym.length = 0;
             insert_symbol(sym, &symbol_table);
@@ -708,7 +794,7 @@ factor:
 
             char value[70];
             sprintf(value,"I_%s", yytext);
-            index_factor = agregar_terceto(terceto, &lista_tercetos, "INT_OP", value, NULL);
+            index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
 
             snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_factor);
             strcpy(sym.data_type, "int");
@@ -719,6 +805,28 @@ factor:
             $$ = index_factor;
             RULE("factor -> CTE_INT");
         }
+    | CTE_FLOAT 
+        {
+            tTerceto terceto;
+            symbol sym;
+            char value[70];
+            char valor_limpio[70];
+
+            strcpy(valor_limpio,yytext);
+            sanitize_string(valor_limpio);
+
+            sprintf(value,"F_%s", valor_limpio);
+            index_factor = agregar_terceto(terceto, &lista_tercetos, value, NULL, NULL);
+
+            snprintf(sym.name, sizeof(sym.name), "aux_var_%d", index_factor);
+            strcpy(sym.data_type, "float");
+            strcpy(sym.value, "");
+            sym.length = 0;
+            insert_symbol(sym, &symbol_table);
+            
+            $$ = index_factor;
+            RULE("factor -> CTE_FLOAT");
+        }
     ;
 
 
@@ -726,7 +834,7 @@ input:
     READ PA ID PC 
         {
             if(check_var_exists($3, &symbol_table) == 0){
-                yyerror("ERROR: Variable usada pero no declarada");
+                sintactic_error("ERROR: Variable usada pero no declarada");
             }
 
             tTerceto terceto;
@@ -762,7 +870,7 @@ output:
     | WRITE PA ID PC
         {
             if(check_var_exists($3, &symbol_table) == 0){
-                yyerror("ERROR: Variable usada pero no declarada");
+                sintactic_error("ERROR: Variable usada pero no declarada");
             }
 
             tTerceto terceto;
@@ -787,11 +895,11 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
     ID OP_ASIG_COMUN SLICE_AND_CONCAT PA CTE_INT COMA CTE_INT COMA CTE_STRING COMA CTE_STRING COMA CTE_INT PC 
         {
             if(check_var_exists($1, &symbol_table) == 0){
-                yyerror("ERROR: Variable usada pero no declarada");
+                sintactic_error("ERROR: Variable usada pero no declarada");
             }
 
             if(check_var_is_string($1, &symbol_table) == IS_NOT_STRING){
-                yyerror("ERROR: La funcion sliceAndConcat devuelve un string");
+                sintactic_error("ERROR: La funcion sliceAndConcat devuelve un string");
             }
 
             // Variables Auxiliares
@@ -819,7 +927,7 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
             //Validar
             if(validar_concatenarEnPalabra1(concatenarEnPalabra1) == SLICE_AND_CONCAT_ERROR)
             {
-                yyerror("valor de concatenarEnPalabra1 inválido, debe ser 0 o 1");
+                sintactic_error("valor de concatenarEnPalabra1 inválido, debe ser 0 o 1");
             }
             
             // Generar str_final
@@ -828,11 +936,11 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
                 //Validamos limites
                 if (validar_limites(limite_inicial, limite_final, palabra2) == SLICE_AND_CONCAT_ERROR)
                 {
-                    yyerror("Límites fuera de rango");
+                    sintactic_error("Límites fuera de rango");
                 }
                 if (slice_and_concat(str_final, palabra1, palabra2, limite_inicial, limite_final) == SLICE_AND_CONCAT_ERROR)
                 {
-                    yyerror("La cadena final excede los 50 caracteres");
+                    sintactic_error("La cadena final excede los 50 caracteres");
                 }
             }
             else
@@ -840,11 +948,11 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
                 //Validamos limites
                 if (validar_limites(limite_inicial, limite_final, palabra1) == SLICE_AND_CONCAT_ERROR)
                 {
-                    yyerror("Límites fuera de rango");
+                    sintactic_error("Límites fuera de rango");
                 }
                 if (slice_and_concat(str_final, palabra2, palabra1, limite_inicial, limite_final) == SLICE_AND_CONCAT_ERROR)
                 {
-                    yyerror("La cadena final excede los 50 caracteres");
+                    sintactic_error("La cadena final excede los 50 caracteres");
                 }
             }
             // Asignar id_destino
@@ -856,11 +964,7 @@ sliceAndConcat: /*El ultimo cte/id tendria que ser un bool*/
             sym.length = strlen(str_final);
             insert_symbol(sym, &symbol_table);
 
-            int ind_aux = agregar_terceto(terceto, &lista_tercetos, "VAR_STRING", sym.name, NULL);
-            char str_ind_aux[50];
-            sprintf(str_ind_aux,"[%d]", ind_aux);
-
-            agregar_terceto(terceto, &lista_tercetos, "STRING_ASIG", id_destino, sym.name);
+            agregar_terceto(terceto, &lista_tercetos, ":=", id_destino, sym.name);
 
             RULE("sliceAndConcat -> SLICE_AND_CONCAT PA CTE_INT COMA CTE_INT COMA CTE_STRING COMA CTE_STRING COMA CTE_INT PC");
         }
@@ -912,11 +1016,11 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
             //Validaciones
             if (direccion < 0 && direccion > 1)
             {
-                yyerror("Dirección inválida. Debe ser 0 (derecha) o 1 (izquierda).");
+                sintactic_error("Dirección inválida. Debe ser 0 (derecha) o 1 (izquierda).");
             }
             if (pivote < 0 || pivote > contador_expresiones_reorder)
             {
-                yyerror("Pivote fuera de rango");
+                sintactic_error("Pivote fuera de rango");
             }
 
             // Inicio de ordenamiento
@@ -959,7 +1063,7 @@ expressions_list:
             sym.length = strlen(nombre_dinamico_variable);
             insert_symbol(sym, &symbol_table);
 
-            agregar_terceto(terceto, &lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, str_index_expression);
+            agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
 
             RULE("expressions_list -> expressions_list COMA expression");
         }
@@ -982,7 +1086,7 @@ expressions_list:
             sym.length = strlen(nombre_dinamico_variable);
             insert_symbol(sym, &symbol_table);
 
-            agregar_terceto(terceto, &lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, str_index_expression);
+            agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
 
             RULE("expressions_list -> expression");
         }
@@ -1013,6 +1117,24 @@ int main(int argc, char *argv[])
     symbol_table_to_file("symbol_table.txt", &symbol_table);
     terceto_to_file("intermediate_code.txt", &lista_tercetos);
     return 0;
+}
+
+
+int semantic_error(char* e)
+{
+    extern int yylineno;
+    printf("Error Semantico en la línea %d: %s\n", yylineno, e);
+    printf("Token inesperado o contexto: '%s'\n", yytext);
+    exit(1);
+}
+
+
+int sintactic_error(char* e)
+{
+    extern int yylineno;
+    printf("Error Sintactico en la línea %d: %s\n", yylineno, e);
+    printf("Token inesperado o contexto: '%s'\n", yytext);
+    exit(1);
 }
 
 int yyerror(char* e)

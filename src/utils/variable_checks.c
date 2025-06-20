@@ -9,7 +9,7 @@ void to_lower(char* str){
     }
 }
 
-void crear_variable(char* var_name, char* data_type, tLista* symbol_table){
+int crear_variable(char* var_name, char* data_type, tLista* symbol_table){
     symbol sym;
 
     strcpy(sym.name, var_name);
@@ -17,7 +17,13 @@ void crear_variable(char* var_name, char* data_type, tLista* symbol_table){
     strcpy(sym.data_type, data_type);
     strcpy(sym.value, "");
     sym.length = strlen(var_name);
+
+    if(check_var_exists(var_name, symbol_table)){
+        return -1;	
+    }
+
     insert_symbol(sym, symbol_table);
+    return 0;
 }
 
 int check_var_exists(char* var_name, tLista* symbol_table){

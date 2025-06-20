@@ -16,7 +16,7 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
     int indice = 1;
     while(indice <= obtener_indice_actual()){
 		tTerceto terceto;
-		int tipo_terceto = get_terceto_para_asm(terceto_lista, indice, &terceto);
+		int tipo_terceto = get_terceto_para_asm(terceto_lista, symbol_table, indice, &terceto);
 		int indice_terceto_destino;
 		int indice_terceto_op1;
 		int indice_terceto_op2;
@@ -25,35 +25,29 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 
 		fprintf(arch, "terceto_%d:\n", indice);
 		switch(tipo_terceto){
-			case VAR_INT:
-				printf("VAR_INT\n");
-				fprintf(arch, "MOV EAX, %s\n", terceto.op1);
-				break;
-			case VAR_FLOAT:
-				printf("VAR_FLOAT\n");
-				fprintf(arch, "fld dword ptr %s\n", terceto.op1);
-				break;
-			case VAR_STRING:
-				printf("VAR_STRING\n");
-				fprintf(arch, "LEA ESI, %s\n", terceto.op1);
-				break;
 			case INT_OP:
 				printf("INT_OP\n");
-				fprintf(arch, "MOV EAX, %s\n", terceto.op1);
+				fprintf(arch, "MOV EAX, %s\n", terceto.operador);
 				fprintf(arch, "MOV aux_var_%d, EAX\n", indice);
 				break;
-			case ARIT_ASIG_INDEX:
-				printf("ARIT_ASIG_INDEX\n");
+			case FLOAT_OP:
+				printf("FLOAT_OP\n");
+				fprintf(arch, "fld dword ptr %s\n", terceto.operador);
+				fprintf(arch, "fstp dword ptr aux_var_%d\n", indice);
+				break;
+			case ARIT_ASIG_INT:
+				printf("ARIT_ASIG_INT\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "MOV EAX, aux_var_%d\n", indice_terceto_op2);
 				fprintf(arch, "MOV %s, EAX\n", terceto.op1);
 				break;
-			case ARIT_ASIG_SIMPLE:
-				printf("ARIT_ASIG_SIMPLE\n");
-				fprintf(arch, "MOV EAX, %s\n", terceto.op2);
-				fprintf(arch, "MOV %s, EAX\n", terceto.op1);
+			case ARIT_ASIG_FLOAT:
+				printf("ARIT_ASIG_FLOAT\n");
+				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
+				fprintf(arch, "fld dword ptr aux_var_%d\n", indice_terceto_op2);
+				fprintf(arch, "fstp dword ptr %s\n", terceto.op1);
 				break;
-			case SUM:
+			case SUM_INT:
 				printf("SUM\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
@@ -61,7 +55,7 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "ADD EAX, aux_var_%d\n", indice_terceto_op2);
 				fprintf(arch, "MOV aux_var_%d, EAX\n", indice);
 				break;
-			case RES:
+			case RES_INT:
 				printf("RES\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
@@ -69,7 +63,7 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "SUB EAX, aux_var_%d\n", indice_terceto_op2);
 				fprintf(arch, "MOV aux_var_%d, EAX\n", indice);
 				break;
-			case MUL:
+			case MUL_INT:
 				printf("MUL\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
@@ -77,7 +71,7 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "IMUL aux_var_%d\n", indice_terceto_op2);
 				fprintf(arch, "MOV aux_var_%d, EAX\n", indice);
 				break;
-			case DIV:
+			case DIV_INT:
 				printf("DIV\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
@@ -86,38 +80,95 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "IDIV aux_var_%d\n", indice_terceto_op2);
 				fprintf(arch, "MOV aux_var_%d, EAX\n", indice);
 				break;
+			case SUM_FLOAT:
+				printf("SUM_FLOAT\n");
+				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
+				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
+				fprintf(arch, "fld dword ptr aux_var_%d\n", indice_terceto_op1);
+				fprintf(arch, "fadd dword ptr aux_var_%d\n", indice_terceto_op2);
+				fprintf(arch, "fstp dword ptr aux_var_%d\n", indice);
+				break;
+			case RES_FLOAT:
+				printf("RES_FLOAT\n");
+				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
+				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
+				fprintf(arch, "fld dword ptr aux_var_%d\n", indice_terceto_op1);
+				fprintf(arch, "fsub dword ptr aux_var_%d\n", indice_terceto_op2);
+				fprintf(arch, "fstp dword ptr aux_var_%d\n", indice);
+				break;
+			case MUL_FLOAT:
+				printf("MUL_FLOAT\n");
+				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
+				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
+				fprintf(arch, "fld dword ptr aux_var_%d\n", indice_terceto_op1);
+				fprintf(arch, "fmul dword ptr aux_var_%d\n", indice_terceto_op2);
+				fprintf(arch, "fstp dword ptr aux_var_%d\n", indice);
+				break;
+			case DIV_FLOAT:
+				printf("DIV_FLOAT\n");
+				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
+				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
+				fprintf(arch, "fld dword ptr aux_var_%d\n", indice_terceto_op1);
+				fprintf(arch, "fdiv dword ptr aux_var_%d\n", indice_terceto_op2);
+				fprintf(arch, "fstp dword ptr aux_var_%d\n", indice);
+				break;
 			case STRING_ASIG:
 				printf("STRING_ASIG\n");
+				fprintf(arch, "LEA ESI, %s\n", terceto.op2);
 				fprintf(arch, "LEA EDI, %s\n", terceto.op1);
 				fprintf(arch, "STRCPY\n");
 				break;
 			case FLOAT_ASIG:
 				printf("FLOAT_ASIG\n");
+				fprintf(arch, "fld dword ptr %s\n", terceto.op2);
 				fprintf(arch, "fstp dword ptr %s\n", terceto.op1);
 				break;
 			case INT_ASIG:
 				printf("INT_ASIG\n");
+				fprintf(arch, "MOV EAX, %s\n", terceto.op2);
 				fprintf(arch, "MOV %s, EAX \n", terceto.op1);
 				break;
-			case CMP:
-				printf("CMP\n");
+			case CMP_INT:
+				printf("CMP_INT\n");
 				fprintf(arch, "MOV EAX, %s\n", terceto.op1);
 				fprintf(arch, "CMP EAX, %s\n", terceto.op2);
 				break;
-			case BLE:
+			case CMP_FLOAT:
+				printf("CMP_FLOAT\n");
+				fprintf(arch, "fld dword ptr %s\n", terceto.op1);
+				fprintf(arch, "fcomp dword ptr %s\n", terceto.op2);
+				fprintf(arch, "fstsw ax\n");
+				fprintf(arch, "sahf\n");
+				break;
+			case BLE_INT:
 				printf("BLE\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
 				fprintf(arch, "JLE terceto_%d\n", indice_terceto_destino);
 				break;
-			case BGT:
+			case BGT_INT:
 				printf("BGT\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
 				fprintf(arch, "JG terceto_%d\n", indice_terceto_destino);
 				break;
-			case BGE:
+			case BGE_INT:
 				printf("BGE\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
 				fprintf(arch, "JGE terceto_%d\n", indice_terceto_destino);
+				break;
+			case BLE_FLOAT:
+				printf("BLE_FLOAT\n");
+				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
+				fprintf(arch, "JBE terceto_%d\n", indice_terceto_destino);
+				break;
+			case BGT_FLOAT:
+				printf("BGT_FLOAT\n");
+				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
+				fprintf(arch, "JA terceto_%d\n", indice_terceto_destino);
+				break;
+			case BGE_FLOAT:
+				printf("BGE_FLOAT\n");
+				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
+				fprintf(arch, "JAE terceto_%d\n", indice_terceto_destino);
 				break;
 			case BI:
 				printf("BI\n");

@@ -4,6 +4,8 @@ init {
     c : String
 }
 
+a := 8
+
 
 write("PROBANDO SELECCION:")
 write("Ingrese un valor para a:")

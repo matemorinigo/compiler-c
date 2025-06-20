@@ -4,22 +4,20 @@
 #define VAR_INT 1
 #define VAR_FLOAT 2
 #define VAR_STRING 3
-#define ARIT_ASIG_INDEX 4
-#define CMP 5
-#define SUM 6
-#define RES 7
-#define MUL 8
-#define DIV 9
+#define CMP_INT 5
+#define SUM_INT 6
+#define RES_INT 7
+#define MUL_INT 8
+#define DIV_INT 9
 #define STRING_ASIG 10
 #define FLOAT_ASIG 11
 #define INT_ASIG 12
-#define BLE 14
-#define BGT 15
-#define BGE 16
+#define BLE_INT 14
+#define BGT_INT 15
+#define BGE_INT 16
 #define BI 17
 #define PRINT_STR 18
 #define PRINT_CTE_STR 19
-#define ARIT_ASIG_SIMPLE 21
 #define INT_OP 22
 #define READ_STRING 23
 #define READ_INT 24
@@ -28,6 +26,17 @@
 #define PRINT_FLOAT 27
 #define PRINT_STR_SIN_NEW_LINE 28
 #define PRINT_INT_SIN_NEW_LINE 29
+#define ARIT_ASIG_INT 31
+#define FLOAT_OP 32
+#define SUM_FLOAT 33
+#define RES_FLOAT 34
+#define MUL_FLOAT 35
+#define DIV_FLOAT 36
+#define ARIT_ASIG_FLOAT 37
+#define CMP_FLOAT 38
+#define BLE_FLOAT 39
+#define BGT_FLOAT 40
+#define BGE_FLOAT 41
 
 typedef struct {
     int indice;
@@ -39,7 +48,7 @@ typedef struct {
 
 
 
-int get_terceto_para_asm(tLista* terceto_lista, int indice, tTerceto* terceto_destino);
+int get_terceto_para_asm(tLista* terceto_lista, tLista* symbol_table, int indice, tTerceto* terceto_destino);
 void init_tercetos(tLista* terceto_table);
 int agregar_terceto(tTerceto t, tLista* terceto_lista, char* operador, char* op1, char* op2);
 void terceto_to_file(char* output_file, tLista* terceto_lista);

@@ -2,8 +2,10 @@
 #include <string.h>
 #include "terceto.h"
 #include "list.h"
+#include "variable_checks.h"
 
 int indice = 0;
+int ult_cmp;
 
 int cmp_terceto(const void* t1, const void* t2){
     return ((tTerceto*)t1)->indice - ((tTerceto*)t2)->indice;
@@ -80,65 +82,108 @@ int actualizar_op2(tLista* terceto_lista, int indice, char* op2){
     return actualizarNodo(terceto_lista, &tercetoBuscar, &tercetoNuevo, sizeof(tTerceto), cmp_terceto);
 }
 
-int get_terceto_para_asm(tLista* terceto_lista, int indice, tTerceto* terceto_destino){
+int get_terceto_para_asm(tLista* terceto_lista, tLista* symbol_table, int indice, tTerceto* terceto_destino){
+    int indice_terceto_op1;
+    char aux_var[50];
     tTerceto tercetoBuscar = { .indice = indice };
     buscarElemento(terceto_lista, &tercetoBuscar, terceto_destino, sizeof(tTerceto), cmp_terceto);
-    char operador[50];
-
-    if(strcmp(terceto_destino->operador, "ARIT_ASIG") == 0){
-        if(strchr(terceto_destino->op2, '[') != NULL){
-            return ARIT_ASIG_INDEX;
-        } else {
-            return ARIT_ASIG_SIMPLE;
+    
+    if(strcmp(terceto_destino->operador, "=:") == 0){
+        if(check_var_is_int(terceto_destino->op1, symbol_table)){
+            return ARIT_ASIG_INT;
+        }
+        if(check_var_is_float(terceto_destino->op1, symbol_table)){
+            return ARIT_ASIG_FLOAT;
         }
     }
-    if(strcmp(terceto_destino->operador, "VAR_INT") == 0){
-        return VAR_INT;
-    }
-    if(strcmp(terceto_destino->operador, "VAR_FLOAT") == 0){
-        return VAR_FLOAT;
-    }
-    if(strcmp(terceto_destino->operador, "VAR_STRING") == 0){
-        return VAR_STRING;
+    if(strcmp(terceto_destino->operador, ":=") == 0){
+        if(check_var_is_int(terceto_destino->op1, symbol_table)){
+            return INT_ASIG;
+        }
+        if(check_var_is_float(terceto_destino->op1, symbol_table)){
+            return FLOAT_ASIG;
+        }
+        if(check_var_is_string(terceto_destino->op1, symbol_table)){
+            return STRING_ASIG;
+        }
+        return -1;
     }
     if(strcmp(terceto_destino->operador, "SUM") == 0){
-        return SUM;
+        sscanf(terceto_destino->op1, "[%d]", &indice_terceto_op1);
+        sprintf(aux_var, "aux_var_%d", indice_terceto_op1);
+        if(check_var_is_int(aux_var, symbol_table)){
+            return SUM_INT;
+        }
+        if(check_var_is_float(aux_var, symbol_table)){
+            return SUM_FLOAT;
+        }
     }
     if(strcmp(terceto_destino->operador, "RES") == 0){
-        return RES;
+        sscanf(terceto_destino->op1, "[%d]", &indice_terceto_op1);
+        sprintf(aux_var, "aux_var_%d", indice_terceto_op1);
+        if(check_var_is_int(aux_var, symbol_table)){
+            return RES_INT;
+        }
+        if(check_var_is_float(aux_var, symbol_table)){
+            return RES_FLOAT;
+        }
     }
     if(strcmp(terceto_destino->operador, "MUL") == 0){
-        return MUL;
+        sscanf(terceto_destino->op1, "[%d]", &indice_terceto_op1);
+        sprintf(aux_var, "aux_var_%d", indice_terceto_op1);
+        if(check_var_is_int(aux_var, symbol_table)){
+            return MUL_INT;
+        }
+        if(check_var_is_float(aux_var, symbol_table)){
+            return MUL_FLOAT;
+        }
     }
     if(strcmp(terceto_destino->operador, "DIV") == 0){
-        return DIV;
-    }
-    if(strcmp(terceto_destino->operador, "STRING_ASIG") == 0){
-        return STRING_ASIG;
-    }
-    if(strcmp(terceto_destino->operador, "FLOAT_ASIG") == 0){
-        return FLOAT_ASIG;
-    }
-    if(strcmp(terceto_destino->operador, "INT_ASIG") == 0){
-        return INT_ASIG;
+        sscanf(terceto_destino->op1, "[%d]", &indice_terceto_op1);
+        sprintf(aux_var, "aux_var_%d", indice_terceto_op1);
+        if(check_var_is_int(aux_var, symbol_table)){
+            return DIV_INT;
+        }
+        if(check_var_is_float(aux_var, symbol_table)){
+            return DIV_FLOAT;
+        }
     }
     if(strcmp(terceto_destino->operador, "CMP") == 0){
-        return CMP;
+        if(check_var_is_int(terceto_destino->op1, symbol_table)){
+            ult_cmp = CMP_INT;
+            return CMP_INT;
+        }
+        if(check_var_is_float(terceto_destino->op1, symbol_table)){
+            ult_cmp = CMP_FLOAT;
+            return CMP_FLOAT;
+        }
     }
     if(strcmp(terceto_destino->operador, "BLE") == 0){
-        return BLE;
+        if(ult_cmp == CMP_INT){
+            return BLE_INT;
+        }
+        if(ult_cmp == CMP_FLOAT){
+            return BLE_FLOAT;
+        }
     }
     if(strcmp(terceto_destino->operador, "BGT") == 0){
-        return BGT;
+        if(ult_cmp == CMP_INT){
+            return BGT_INT;
+        }
+        if(ult_cmp == CMP_FLOAT){
+            return BGT_FLOAT;
+        }
     }
     if(strcmp(terceto_destino->operador, "BGE") == 0){
-        return BGE;
+        if(ult_cmp == CMP_INT){
+            return BGE_INT;
+        }
+        if(ult_cmp == CMP_FLOAT){
+            return BGE_FLOAT;
+        }
     }
     if(strcmp(terceto_destino->operador, "BI") == 0){
         return BI;
-    }
-    if(strcmp(terceto_destino->operador, "INT_OP") == 0){
-        return INT_OP;
     }
     if(strcmp(terceto_destino->operador, "READ_STRING") == 0){
         return READ_STRING;
@@ -166,6 +211,13 @@ int get_terceto_para_asm(tLista* terceto_lista, int indice, tTerceto* terceto_de
     }
     if(strcmp(terceto_destino->operador, "PRINT_INT_SIN_NEW_LINE") == 0){
         return PRINT_INT_SIN_NEW_LINE;
+    }
+    // Si llego hasta aca, es que el operador es una variable que sera usada para una operacion aritmetica.
+    if(check_var_is_int(terceto_destino->operador, symbol_table)){
+        return INT_OP;
+    }
+    if(check_var_is_float(terceto_destino->operador, symbol_table)){
+        return FLOAT_OP;
     }
     return -1;
 }
