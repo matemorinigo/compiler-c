@@ -161,5 +161,11 @@ int get_terceto_para_asm(tLista* terceto_lista, int indice, tTerceto* terceto_de
     if(strcmp(terceto_destino->operador, "PRINT_CTE_STR") == 0){
         return PRINT_CTE_STR;
     }
+    if(strcmp(terceto_destino->operador, "PRINT_STR_SIN_NEW_LINE") == 0){
+        return PRINT_STR_SIN_NEW_LINE;
+    }
+    if(strcmp(terceto_destino->operador, "PRINT_INT_SIN_NEW_LINE") == 0){
+        return PRINT_INT_SIN_NEW_LINE;
+    }
     return -1;
 }

@@ -1,0 +1,7 @@
+init {
+    a, b, c : Float
+}
+
+write("Escribe un valor para c")
+read(c)
+write(c)

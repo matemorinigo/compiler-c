@@ -4,10 +4,18 @@ init {
     c : String
 }
 
-
 write("PROBANDO SELECCION:")
 write("Ingrese un valor para a:")
 read(a)
 write("Ingrese un valor para b:")
 read(b)
+
+if(a > b){
+    a =: a * b
+    write(a)
+    write("a es mas grande que b")
+}
+else{
+    write("a NO es mas grande que b")
+}
 

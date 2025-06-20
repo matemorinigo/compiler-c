@@ -775,6 +775,9 @@ output:
             else if(check_var_is_float($3, &symbol_table) == IS_FLOAT){
                 agregar_terceto(terceto, &lista_tercetos, "PRINT_FLOAT", id_to_print, NULL);
             }
+            else if(check_var_is_string($3, &symbol_table) == IS_STRING){
+                agregar_terceto(terceto, &lista_tercetos, "PRINT_STR", id_to_print, NULL);
+            }
             
             RULE("output -> WRITE PA ID PC");
         }

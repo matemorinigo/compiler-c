@@ -26,6 +26,8 @@
 #define READ_FLOAT 25
 #define PRINT_INT 26
 #define PRINT_FLOAT 27
+#define PRINT_STR_SIN_NEW_LINE 28
+#define PRINT_INT_SIN_NEW_LINE 29
 
 typedef struct {
     int indice;

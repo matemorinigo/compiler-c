@@ -6,16 +6,16 @@ void crear_print_tercetos(int contador, int contador_expresiones_reorder, const 
 {
     tTerceto terceto;
     char nombre_dinamico_variable[50];
-    agregar_terceto(terceto, lista_tercetos, "PRINT_STR", "T_corchete_abre", NULL);
+    agregar_terceto(terceto, lista_tercetos, "PRINT_STR_SIN_NEW_LINE", "T_corchete_abre", NULL);
     contador = 0;
     //Printeamos todas las expresiones que caen antes del pivote
-    while(contador < contador_expresiones_reorder)
+    while(contador <= contador_expresiones_reorder)
     {
-        contador++;
         sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador);
-        agregar_terceto(terceto, lista_tercetos, "PRINT_INT", nombre_dinamico_variable, NULL);
+        agregar_terceto(terceto, lista_tercetos, "PRINT_INT_SIN_NEW_LINE", nombre_dinamico_variable, NULL);
+        contador++;
         if(contador <= contador_expresiones_reorder)
-            agregar_terceto(terceto, lista_tercetos, "PRINT_STR", "T_coma", NULL);
+            agregar_terceto(terceto, lista_tercetos, "PRINT_STR_SIN_NEW_LINE", "T_coma", NULL);
     }
     agregar_terceto(terceto, lista_tercetos, "PRINT_STR", "T_corchete_cierra", NULL);
 
@@ -70,14 +70,14 @@ void crear_tercetor_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, 
             //// Intercambio la variable actual con el minimo
             //aux = min
 
-            idx_aux = agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "aux_", "min_");
-            sprintf(str_idx_aux,"[%d]",idx_aux);
+            //idx_aux = agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "aux_", "min_");
+            //sprintf(str_idx_aux,"[%d]",idx_aux);
 
             //min = var
-            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "min_", nombre_dinamico_variable);
+            //agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", "min_", nombre_dinamico_variable);
 
             //var = aux
-            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, "aux_");
+            agregar_terceto(terceto, lista_tercetos, "ARIT_ASIG", nombre_dinamico_variable, "min_");
 
         }
 }

@@ -1,0 +1,18 @@
+init {
+    a, b : Int
+    x : Float
+    c : String
+}
+
+write("PROBANDO BUCLES:")
+a := 8
+b := 10
+
+while (NOT a > b)
+{
+    write("valor a:")
+    write(a)
+    write("valor b:")
+    write(b)
+    a =: a + 1
+}
