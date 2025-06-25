@@ -2,7 +2,7 @@
 #include <string.h>
 #include "terceto.h"
 
-void crear_print_tercetos(int contador, int contador_expresiones_reorder, const char *nombre_base_variable_aux, tLista *lista_tercetos) 
+void crear_print_tercetos(int contador, int tipo_dato, int contador_expresiones_reorder, const char *nombre_base_variable_aux, tLista *lista_tercetos) 
 {
     tTerceto terceto;
     char nombre_dinamico_variable[50];
@@ -12,7 +12,10 @@ void crear_print_tercetos(int contador, int contador_expresiones_reorder, const 
     while(contador <= contador_expresiones_reorder)
     {
         sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador);
-        agregar_terceto(terceto, lista_tercetos, "PRINT_INT_SIN_NEW_LINE", nombre_dinamico_variable, NULL);
+        if(tipo_dato == 0)
+            agregar_terceto(terceto, lista_tercetos, "PRINT_INT_SIN_NEW_LINE", nombre_dinamico_variable, NULL);
+        else if(tipo_dato == 1)
+            agregar_terceto(terceto, lista_tercetos, "PRINT_FLOAT_SIN_NEW_LINE", nombre_dinamico_variable, NULL);
         contador++;
         if(contador <= contador_expresiones_reorder)
             agregar_terceto(terceto, lista_tercetos, "PRINT_STR_SIN_NEW_LINE", "T_coma", NULL);

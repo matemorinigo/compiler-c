@@ -2,7 +2,7 @@
 
 
 void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
-    FILE* arch = fopen("Final.asm", "w");
+    FILE* arch = fopen("./final_assembler/final.asm", "w");
     if(!arch){
             printf("No pude crear el archivo final.txt\n");
             return;
@@ -21,34 +21,29 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 		int indice_terceto_op1;
 		int indice_terceto_op2;
 
-		printf("Terceto: %s %s %s\n", terceto.operador, terceto.op1, terceto.op2);
+		//printf("Terceto: %s %s %s\n", terceto.operador, terceto.op1, terceto.op2);
 
 		fprintf(arch, "terceto_%d:\n", indice);
 		switch(tipo_terceto){
 			case INT_OP:
-				printf("INT_OP\n");
 				fprintf(arch, "MOV EAX, %s\n", terceto.operador);
 				fprintf(arch, "MOV aux_var_%d, EAX\n", indice);
 				break;
 			case FLOAT_OP:
-				printf("FLOAT_OP\n");
 				fprintf(arch, "fld dword ptr %s\n", terceto.operador);
 				fprintf(arch, "fstp dword ptr aux_var_%d\n", indice);
 				break;
 			case ARIT_ASIG_INT:
-				printf("ARIT_ASIG_INT\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "MOV EAX, aux_var_%d\n", indice_terceto_op2);
 				fprintf(arch, "MOV %s, EAX\n", terceto.op1);
 				break;
 			case ARIT_ASIG_FLOAT:
-				printf("ARIT_ASIG_FLOAT\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "fld dword ptr aux_var_%d\n", indice_terceto_op2);
 				fprintf(arch, "fstp dword ptr %s\n", terceto.op1);
 				break;
 			case SUM_INT:
-				printf("SUM\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "MOV EAX, aux_var_%d\n", indice_terceto_op1);
@@ -56,7 +51,6 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "MOV aux_var_%d, EAX\n", indice);
 				break;
 			case RES_INT:
-				printf("RES\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "MOV EAX, aux_var_%d\n", indice_terceto_op1);
@@ -64,7 +58,6 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "MOV aux_var_%d, EAX\n", indice);
 				break;
 			case MUL_INT:
-				printf("MUL\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "MOV EAX, aux_var_%d\n", indice_terceto_op1);
@@ -72,7 +65,6 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "MOV aux_var_%d, EAX\n", indice);
 				break;
 			case DIV_INT:
-				printf("DIV\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "MOV EAX, aux_var_%d\n", indice_terceto_op1);
@@ -81,7 +73,6 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "MOV aux_var_%d, EAX\n", indice);
 				break;
 			case SUM_FLOAT:
-				printf("SUM_FLOAT\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "fld dword ptr aux_var_%d\n", indice_terceto_op1);
@@ -89,7 +80,6 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "fstp dword ptr aux_var_%d\n", indice);
 				break;
 			case RES_FLOAT:
-				printf("RES_FLOAT\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "fld dword ptr aux_var_%d\n", indice_terceto_op1);
@@ -97,7 +87,6 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "fstp dword ptr aux_var_%d\n", indice);
 				break;
 			case MUL_FLOAT:
-				printf("MUL_FLOAT\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "fld dword ptr aux_var_%d\n", indice_terceto_op1);
@@ -105,7 +94,6 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "fstp dword ptr aux_var_%d\n", indice);
 				break;
 			case DIV_FLOAT:
-				printf("DIV_FLOAT\n");
 				sscanf(terceto.op1, "[%d]", &indice_terceto_op1);
 				sscanf(terceto.op2, "[%d]", &indice_terceto_op2);
 				fprintf(arch, "fld dword ptr aux_var_%d\n", indice_terceto_op1);
@@ -113,104 +101,88 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				fprintf(arch, "fstp dword ptr aux_var_%d\n", indice);
 				break;
 			case STRING_ASIG:
-				printf("STRING_ASIG\n");
 				fprintf(arch, "LEA ESI, %s\n", terceto.op2);
 				fprintf(arch, "LEA EDI, %s\n", terceto.op1);
 				fprintf(arch, "STRCPY\n");
 				break;
 			case FLOAT_ASIG:
-				printf("FLOAT_ASIG\n");
 				fprintf(arch, "fld dword ptr %s\n", terceto.op2);
 				fprintf(arch, "fstp dword ptr %s\n", terceto.op1);
 				break;
 			case INT_ASIG:
-				printf("INT_ASIG\n");
 				fprintf(arch, "MOV EAX, %s\n", terceto.op2);
 				fprintf(arch, "MOV %s, EAX \n", terceto.op1);
 				break;
 			case CMP_INT:
-				printf("CMP_INT\n");
 				fprintf(arch, "MOV EAX, %s\n", terceto.op1);
 				fprintf(arch, "CMP EAX, %s\n", terceto.op2);
 				break;
 			case CMP_FLOAT:
-				printf("CMP_FLOAT\n");
 				fprintf(arch, "fld dword ptr %s\n", terceto.op1);
 				fprintf(arch, "fcomp dword ptr %s\n", terceto.op2);
 				fprintf(arch, "fstsw ax\n");
 				fprintf(arch, "sahf\n");
 				break;
 			case BLE_INT:
-				printf("BLE\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
 				fprintf(arch, "JLE terceto_%d\n", indice_terceto_destino);
 				break;
 			case BGT_INT:
-				printf("BGT\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
 				fprintf(arch, "JG terceto_%d\n", indice_terceto_destino);
 				break;
 			case BGE_INT:
-				printf("BGE\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
 				fprintf(arch, "JGE terceto_%d\n", indice_terceto_destino);
 				break;
 			case BLE_FLOAT:
-				printf("BLE_FLOAT\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
 				fprintf(arch, "JBE terceto_%d\n", indice_terceto_destino);
 				break;
 			case BGT_FLOAT:
-				printf("BGT_FLOAT\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
 				fprintf(arch, "JA terceto_%d\n", indice_terceto_destino);
 				break;
 			case BGE_FLOAT:
-				printf("BGE_FLOAT\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
 				fprintf(arch, "JAE terceto_%d\n", indice_terceto_destino);
 				break;
 			case BI:
-				printf("BI\n");
 				sscanf(terceto.op2, "[%d]", &indice_terceto_destino);
 				fprintf(arch, "JMP terceto_%d\n", indice_terceto_destino);
 				break;
 			case PRINT_STR:
-				printf("PRINT_STR\n");
 				fprintf(arch, "displayString %s\n", terceto.op1);
 				fprintf(arch, "displayString NEW_LINE\n");
 				break;
 			case PRINT_INT:
-				printf("PRINT_INT\n");
 				fprintf(arch, "DisplayInteger %s\n", terceto.op1);
 				fprintf(arch, "displayString NEW_LINE\n");
 				break;
 			case PRINT_FLOAT:
-				printf("PRINT_FLOAT\n");
 				fprintf(arch, "DisplayFloat %s,2\n", terceto.op1);
 				fprintf(arch, "displayString NEW_LINE\n");
 				break;
+			case PRINT_FLOAT_SIN_NEW_LINE:
+				fprintf(arch, "DisplayFloat %s,2\n", terceto.op1);
+				break;
 			case READ_STRING:
-				printf("READ_STRING\n");
 				fprintf(arch, "getString %s\n\n", terceto.op1);
 				break;
 			case READ_INT:
-				printf("READ_INT\n");
 				fprintf(arch, "getInteger %s\n\n", terceto.op1);
 				break;
 			case READ_FLOAT:
-				printf("READ_FLOAT\n");
 				fprintf(arch, "getFloat %s\n\n", terceto.op1);
 				break;
 			case PRINT_STR_SIN_NEW_LINE:
-				printf("PRINT_STR_SIN_NEW_LINE\n");
 				fprintf(arch, "displayString %s\n", terceto.op1);
 				break;
 			case PRINT_INT_SIN_NEW_LINE:
-				printf("PRINT_INT_SIN_NEW_LINE\n");
 				fprintf(arch, "DisplayInteger %s\n", terceto.op1);
+				break;
 			default:
-				printf("Tipo de terceto no valido\n");
+				printf("Tipo de terceto no valido: %d\n", tipo_terceto);
 				break;
 		}
         

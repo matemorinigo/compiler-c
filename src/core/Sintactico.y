@@ -59,7 +59,7 @@ extern FILE* yyin;
 %left <str_val> AND OR
 %right <str_val> NOT
 
-%type <int_val> expression factor term arithmetic_assig cte condition selection loop
+%type <int_val> expression factor term arithmetic_assig cte condition selection loop expressions_list
 
 %start start
 
@@ -1009,7 +1009,7 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
 
             strcpy(sym.name, "T_coma");
             strcpy(sym.data_type, "string");
-            strcpy(sym.value, "\",\"");
+            strcpy(sym.value, "\";\"");
             sym.length = 1;
             insert_symbol(sym, &symbol_table);
 
@@ -1038,7 +1038,12 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
             crear_tercetor_ordenamiento(inicio_ordenamiento, fin_ordenamiento, nombre_base_variable_aux, &lista_tercetos);
 
             // Mostrar resultado
-            crear_print_tercetos(contador, contador_expresiones_reorder, nombre_base_variable_aux, &lista_tercetos);
+            if(check_var_is_int("interna_expr_0", &symbol_table)){
+                crear_print_tercetos(contador, 0, contador_expresiones_reorder, nombre_base_variable_aux, &lista_tercetos);
+            }
+            else{
+                crear_print_tercetos(contador, 1, contador_expresiones_reorder, nombre_base_variable_aux, &lista_tercetos);
+            }
 
             RULE("REORDER -> REORDER PA OPEN_BRACKET expressions_list CLOSE_BRACKET COMA CTE_INT COMA CTE_INT PC");
         }
@@ -1052,18 +1057,39 @@ expressions_list:
             char nombre_dinamico_variable[50];
             char str_index_expression[50];
             tTerceto terceto;
+            int index_expression = $1;
+            char str_var_expression[50];
+            sprintf(str_var_expression,"aux_var_%d", index_expression);
 
             contador_expresiones_reorder++;
             sprintf(str_index_expression,"[%d]", $3);
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
 
             sprintf(sym.name, "%s", nombre_dinamico_variable);
-            strcpy(sym.data_type, "int");
+
+
+
+            if(check_var_is_int(str_var_expression, &symbol_table)){
+                strcpy(sym.data_type, "int");
+            }
+            else if(check_var_is_float(str_var_expression, &symbol_table)){
+                strcpy(sym.data_type, "float");
+            }
+
             strcpy(sym.value, "0");
             sym.length = strlen(nombre_dinamico_variable);
             insert_symbol(sym, &symbol_table);
 
+            if(compare_datatypes(str_var_expression, nombre_dinamico_variable, &symbol_table) == DIFFERENT_DATATYPE){
+                symbol_table_to_file("symbol_table.txt", &symbol_table);
+                printf("%s\n", str_var_expression);
+                printf("%s\n", nombre_dinamico_variable);
+                semantic_error("Error: No se pueden hacer reorder entre expresiones de diferente tipo de dato");
+            }
+
             agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
+
+            $$ = index_expression;
 
             RULE("expressions_list -> expressions_list COMA expression");
         }
@@ -1074,6 +1100,10 @@ expressions_list:
             char nombre_dinamico_variable[50];
             char str_index_expression[50];
             tTerceto terceto;
+            int index_expression = $1;
+            char str_var_expression[50];
+
+            sprintf(str_var_expression,"aux_var_%d", index_expression);
 
             contador_expresiones_reorder = 0;
             sprintf(str_index_expression,"[%d]", $1);
@@ -1081,12 +1111,20 @@ expressions_list:
 
 
             sprintf(sym.name, "%s", nombre_dinamico_variable);
-            strcpy(sym.data_type, "int");
+            if(check_var_is_int(str_var_expression, &symbol_table)){
+                strcpy(sym.data_type, "int");
+            }
+            else if(check_var_is_float(str_var_expression, &symbol_table)){
+                strcpy(sym.data_type, "float");
+            }
+
             strcpy(sym.value, "0");
             sym.length = strlen(nombre_dinamico_variable);
             insert_symbol(sym, &symbol_table);
 
             agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
+
+            $$ = index_expression;
 
             RULE("expressions_list -> expression");
         }

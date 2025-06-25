@@ -37,6 +37,7 @@
 #define BLE_FLOAT 39
 #define BGT_FLOAT 40
 #define BGE_FLOAT 41
+#define PRINT_FLOAT_SIN_NEW_LINE 42
 
 typedef struct {
     int indice;

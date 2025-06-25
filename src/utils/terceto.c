@@ -212,6 +212,9 @@ int get_terceto_para_asm(tLista* terceto_lista, tLista* symbol_table, int indice
     if(strcmp(terceto_destino->operador, "PRINT_INT_SIN_NEW_LINE") == 0){
         return PRINT_INT_SIN_NEW_LINE;
     }
+    if(strcmp(terceto_destino->operador, "PRINT_FLOAT_SIN_NEW_LINE") == 0){
+        return PRINT_FLOAT_SIN_NEW_LINE;
+    }
     // Si llego hasta aca, es que el operador es una variable que sera usada para una operacion aritmetica.
     if(check_var_is_int(terceto_destino->operador, symbol_table)){
         return INT_OP;
