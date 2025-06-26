@@ -1,55 +1,58 @@
 init {
-    a, b : Int
-    x : Float
-    c : String
+    a, b, c, d : Int
+    x, y, z : Float
+    j : String
 }
 
-a := 8
+#+ SELECCION +#
+
+#+ write("PROBANDO SELECCION:") +#
+#+ write("Ingrese un valor para a:") +#
+#+ read(a) +#
+#+ write("Ingrese un valor para b:") +#
+#+ read(b) +#
+#+  +#
+#+ if(a > b){ +#
+#+     a =: a * b +#
+#+     write(a) +#
+#+     write("a es mas grande que b") +#
+#+ } +#
+#+ else{ +#
+#+     write("a NO es mas grande que b") +#
+#+ } +#
+
+#+ SELECCION +#
 
 
-write("PROBANDO SELECCION:")
-write("Ingrese un valor para a:")
-read(a)
-write("Ingrese un valor para b:")
-read(b)
+#+ BUCLES +#
 
-if(a > b){
-    a =: a * b
-    write(a)
-    write("a es mas grande que b")
-}
-else{
-    write("a NO es mas grande que b")
-}
+#+ write("PROBANDO BUCLES:") +#
+#+ a := 8 +#
+#+ b := 10 +#
+#+  +#
+#+ while (NOT a > b) +#
+#+ { +#
+#+     write("valor a:") +#
+#+     write(a) +#
+#+     write("valor b:") +#
+#+     write(b) +#
+#+     a =: a + 1 +#
+#+ } +#
 
-read(b)
+#+ BUCLES +#
 
-write("PROBANDO BUCLES:")
-a := 8
-b := 10
+#+ SLICE AND CONCAT +#
 
-while (NOT a > b)
-{
-    write("valor a:")
-    write(a)
-    write("valor b:")
-    write(b)
-    a =: a + 1
-}
+j = sliceAndConcat(3, 6, "amarillo", "verde", 0)
+write(j)
 
-a := 12
-b := 6
+#+ SLICE AND CONCAT +#
 
-reorder([5*a+3, 1+1, 9-b/2],1,2)
-
-c = sliceAndConcat(3, 6, "amarillo", "verde", 0)
-
-write(c)
 
 #+ CASOS DE FALLO +#
 
 #+ Utilizar variable no declarada +#
-#+ j := 10  +#
+#+ f := 10  +#
 
 #+ Asignar un float a un int +#
 #+ b =: 1.2 +#

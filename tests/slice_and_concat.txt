@@ -1,7 +1,0 @@
-init {
-    c : String
-}
-
-c = sliceAndConcat(3, 6, "amarillo", "verde", 0)
-
-write(c)
