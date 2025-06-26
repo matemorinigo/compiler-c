@@ -22,6 +22,7 @@ int sintactic_error(char* e);
 int yystopparser=0;
 tLista symbol_table;
 tLista lista_tercetos;
+tLista lista_aux_reorder;
 tLista aux_declarations;
 tLista aux_conditions;
 tLista aux_else;
@@ -978,8 +979,6 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
             int inicio_ordenamiento;
             int fin_ordenamiento;
             tTerceto terceto;
-            char* nombre_base_variable_aux = "interna_expr_";
-            char nombre_dinamico_variable[50];
             int contador;
             symbol sym;
 
@@ -1035,15 +1034,20 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
                 fin_ordenamiento = pivote + 1;
             }
             //Crear los tercetos que ordenaran las variables
-            crear_tercetor_ordenamiento(inicio_ordenamiento, fin_ordenamiento, nombre_base_variable_aux, &lista_tercetos);
+            crear_tercetos_ordenamiento(inicio_ordenamiento, fin_ordenamiento, &lista_tercetos, &lista_aux_reorder);
 
             // Mostrar resultado
-            if(check_var_is_int("interna_expr_0", &symbol_table)){
-                crear_print_tercetos(contador, 0, contador_expresiones_reorder, nombre_base_variable_aux, &lista_tercetos);
+            char primer_variable_lista[50];
+            obtenerElemento(&lista_aux_reorder, &primer_variable_lista, sizeof(primer_variable_lista), 0);
+
+            if(check_var_is_int(primer_variable_lista, &symbol_table)){
+                crear_print_tercetos(contador, 0, contador_expresiones_reorder, &lista_tercetos, &lista_aux_reorder);
             }
             else{
-                crear_print_tercetos(contador, 1, contador_expresiones_reorder, nombre_base_variable_aux, &lista_tercetos);
+                crear_print_tercetos(contador, 1, contador_expresiones_reorder, &lista_tercetos, &lista_aux_reorder);
             }
+
+            vaciarListaSinDestruir(&lista_aux_reorder);
 
             RULE("REORDER -> REORDER PA OPEN_BRACKET expressions_list CLOSE_BRACKET COMA CTE_INT COMA CTE_INT PC");
         }
@@ -1052,42 +1056,26 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
 expressions_list:
     expressions_list COMA expression 
         {
-            symbol sym;
-            char* nombre_base_variable_aux = "interna_expr_";
-            char nombre_dinamico_variable[50];
-            char str_index_expression[50];
             tTerceto terceto;
-            int index_expression = $1;
+            int index_expression_list = $1;
+            int index_expression = $3;
+
+            char sample_var_expression_list[50];
             char str_var_expression[50];
+            
             sprintf(str_var_expression,"aux_var_%d", index_expression);
+            sprintf(sample_var_expression_list, "aux_var_%d", index_expression_list);
 
             contador_expresiones_reorder++;
-            sprintf(str_index_expression,"[%d]", $3);
-            sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
 
-            sprintf(sym.name, "%s", nombre_dinamico_variable);
-
-
-
-            if(check_var_is_int(str_var_expression, &symbol_table)){
-                strcpy(sym.data_type, "int");
-            }
-            else if(check_var_is_float(str_var_expression, &symbol_table)){
-                strcpy(sym.data_type, "float");
-            }
-
-            strcpy(sym.value, "0");
-            sym.length = strlen(nombre_dinamico_variable);
-            insert_symbol(sym, &symbol_table);
-
-            if(compare_datatypes(str_var_expression, nombre_dinamico_variable, &symbol_table) == DIFFERENT_DATATYPE){
+            if(compare_datatypes(str_var_expression, sample_var_expression_list, &symbol_table) == DIFFERENT_DATATYPE){
                 symbol_table_to_file("symbol_table.txt", &symbol_table);
                 printf("%s\n", str_var_expression);
-                printf("%s\n", nombre_dinamico_variable);
+                printf("%s\n", sample_var_expression_list);
                 semantic_error("Error: No se pueden hacer reorder entre expresiones de diferente tipo de dato");
             }
 
-            agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
+            ponerAlFinal(&lista_aux_reorder, &str_var_expression, sizeof(str_var_expression));
 
             $$ = index_expression;
 
@@ -1095,34 +1083,14 @@ expressions_list:
         }
     | expression 
         {
-            symbol sym;
-            char* nombre_base_variable_aux = "interna_expr_";
-            char nombre_dinamico_variable[50];
-            char str_index_expression[50];
             tTerceto terceto;
             int index_expression = $1;
             char str_var_expression[50];
+            contador_expresiones_reorder = 0;
 
             sprintf(str_var_expression,"aux_var_%d", index_expression);
 
-            contador_expresiones_reorder = 0;
-            sprintf(str_index_expression,"[%d]", $1);
-            sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
-
-
-            sprintf(sym.name, "%s", nombre_dinamico_variable);
-            if(check_var_is_int(str_var_expression, &symbol_table)){
-                strcpy(sym.data_type, "int");
-            }
-            else if(check_var_is_float(str_var_expression, &symbol_table)){
-                strcpy(sym.data_type, "float");
-            }
-
-            strcpy(sym.value, "0");
-            sym.length = strlen(nombre_dinamico_variable);
-            insert_symbol(sym, &symbol_table);
-
-            agregar_terceto(terceto, &lista_tercetos, "=:", nombre_dinamico_variable, str_index_expression);
+            ponerAlFinal(&lista_aux_reorder, &str_var_expression, sizeof(str_var_expression));
 
             $$ = index_expression;
 
@@ -1145,6 +1113,7 @@ int main(int argc, char *argv[])
     init_tercetos(&lista_tercetos);
     crearLista(&aux_conditions);
     crearLista(&aux_else);
+    crearLista(&lista_aux_reorder);
 
     int parserResult = yyparse();
 

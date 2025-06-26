@@ -148,6 +148,20 @@ void vaciarLista(tLista* pl)
     }
 }
 
+void vaciarListaSinDestruir(tLista* pl)
+{
+    tNodo* nae;
+
+    while(*pl)
+    {
+        nae = *pl;
+        *pl = nae->siguiente;
+        free(nae->dato);
+        free(nae);
+    }
+    *pl = NULL;  // Asegurar que la lista quede en estado válido para reutilización
+}
+
 void recorrerLista(tLista* pl,void funcion(void*, void*), void* param)
 {
     while(*pl)

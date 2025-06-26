@@ -222,5 +222,6 @@ int get_terceto_para_asm(tLista* terceto_lista, tLista* symbol_table, int indice
     if(check_var_is_float(terceto_destino->operador, symbol_table)){
         return FLOAT_OP;
     }
+    printf("Terceto: %s %s %s\n", terceto_destino->operador, terceto_destino->op1, terceto_destino->op2);
     return -1;
 }

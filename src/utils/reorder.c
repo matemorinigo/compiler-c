@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "terceto.h"
+#include "list.h"
 
-void crear_print_tercetos(int contador, int tipo_dato, int contador_expresiones_reorder, const char *nombre_base_variable_aux, tLista *lista_tercetos) 
+void crear_print_tercetos(int contador, int tipo_dato, int contador_expresiones_reorder, tLista *lista_tercetos, tLista *lista_aux_reorder) 
 {
     tTerceto terceto;
     char nombre_dinamico_variable[50];
@@ -11,7 +12,8 @@ void crear_print_tercetos(int contador, int tipo_dato, int contador_expresiones_
     //Printeamos todas las expresiones que caen antes del pivote
     while(contador <= contador_expresiones_reorder)
     {
-        sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador);
+        //sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador);
+        obtenerElemento(lista_aux_reorder, &nombre_dinamico_variable, sizeof(nombre_dinamico_variable), contador);
         if(tipo_dato == 0)
             agregar_terceto(terceto, lista_tercetos, "PRINT_INT_SIN_NEW_LINE", nombre_dinamico_variable, NULL);
         else if(tipo_dato == 1)
@@ -24,7 +26,7 @@ void crear_print_tercetos(int contador, int tipo_dato, int contador_expresiones_
 
 }
 
-void crear_tercetor_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, const char *nombre_base_variable_aux, tLista *lista_tercetos)
+void crear_tercetos_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, tLista *lista_tercetos, tLista *lista_aux_reorder)
 {
     tTerceto terceto;
     char nombre_dinamico_variable[50];
@@ -38,7 +40,8 @@ void crear_tercetor_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, 
             char str_idx_var[50];
 
             //El primer elemento es el minimo
-            sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, i);
+            //sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, i);
+            obtenerElemento(lista_aux_reorder, &nombre_dinamico_variable, sizeof(nombre_dinamico_variable), i);
             agregar_terceto(terceto, lista_tercetos, ":=", "min_", nombre_dinamico_variable);
 
             for(int j = i+1; j < fin_ordenamiento; j++)
@@ -47,14 +50,15 @@ void crear_tercetor_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, 
                 int idx_cond_para_JF;
                 char str_idx_cond[50];
                 char str_idx_cond_para_JF[50];
-                sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, j);
+                //sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, j);
+                obtenerElemento(lista_aux_reorder, &nombre_dinamico_variable, sizeof(nombre_dinamico_variable), j);
 
                 // Comparo var < min
                 idx_cond = agregar_terceto(terceto, lista_tercetos, "CMP", nombre_dinamico_variable, "min_");
                 sprintf(str_idx_cond,"[%d]",idx_cond);
 
                 // Si min es menor, salto a despues de la asignacion
-                sprintf(str_idx_cond_para_JF,"[%d]",idx_cond + 6);
+                sprintf(str_idx_cond_para_JF,"[%d]",idx_cond + 5);
                 agregar_terceto(terceto, lista_tercetos, "BGE", str_idx_cond, str_idx_cond_para_JF);
 
                 //// Si var es menor, intercambio
@@ -68,7 +72,8 @@ void crear_tercetor_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, 
                 //var = aux
                 agregar_terceto(terceto, lista_tercetos, ":=", nombre_dinamico_variable, "aux_");
             }
-            sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, i);
+            //sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, i);
+            obtenerElemento(lista_aux_reorder, &nombre_dinamico_variable, sizeof(nombre_dinamico_variable), i);
 
             //// Intercambio la variable actual con el minimo
 
