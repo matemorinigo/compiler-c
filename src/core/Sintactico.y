@@ -1066,9 +1066,7 @@ expressions_list:
             sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
 
             sprintf(sym.name, "%s", nombre_dinamico_variable);
-
-
-
+            
             if(check_var_is_int(str_var_expression, &symbol_table)){
                 strcpy(sym.data_type, "int");
             }

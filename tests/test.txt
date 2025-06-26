@@ -1,16 +1,13 @@
 init {
     a, b : Int
-    x : Float
+    x, y, z : Float
     c : String
 }
 
-a := 8
-
-
 write("PROBANDO SELECCION:")
-write("Ingrese un valor para a:")
+write("Ingrese un valor para a (int):")
 read(a)
-write("Ingrese un valor para b:")
+write("Ingrese un valor para b (int):")
 read(b)
 
 if(a > b){
@@ -22,7 +19,9 @@ else{
     write("a NO es mas grande que b")
 }
 
-read(b)
+write("Ingrese un valor para c (string):")
+read(c)
+write(c)
 
 write("PROBANDO BUCLES:")
 a := 8
@@ -37,14 +36,26 @@ while (NOT a > b)
     a =: a + 1
 }
 
+write("Probando reorder con enteros:")
+write("Resultado esperado: 2 63 6")
 a := 12
 b := 6
+reorder([5*a+3, 1+1, 9-b/2],1,1)
 
-reorder([5*a+3, 1+1, 9-b/2],1,2)
+write("Probando reorder con flotantes:")
+write("Resultado esperado: 67.58 1.18 3.3 9.85")
+x := 12.1
+y := 6.6
+z := 1.2
+reorder([5.3*x+3.45, 1.23 / y, 9.34-z/2.232, 2.2 + 1.1], 0, 1)
 
+write("Probando Slice And Concat")
 c = sliceAndConcat(3, 6, "amarillo", "verde", 0)
-
 write(c)
+
+
+
+
 
 #+ CASOS DE FALLO +#
 

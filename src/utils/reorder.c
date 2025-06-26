@@ -54,7 +54,7 @@ void crear_tercetor_ordenamiento(int inicio_ordenamiento, int fin_ordenamiento, 
                 sprintf(str_idx_cond,"[%d]",idx_cond);
 
                 // Si min es menor, salto a despues de la asignacion
-                sprintf(str_idx_cond_para_JF,"[%d]",idx_cond + 6);
+                sprintf(str_idx_cond_para_JF,"[%d]",idx_cond + 5);
                 agregar_terceto(terceto, lista_tercetos, "BGE", str_idx_cond, str_idx_cond_para_JF);
 
                 //// Si var es menor, intercambio
