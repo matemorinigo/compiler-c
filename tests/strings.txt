@@ -1,0 +1,7 @@
+init {
+    c : String
+}
+
+write("Ingrese un valor para c (string):")
+read(c)
+write(c)

@@ -1,9 +1,0 @@
-init {
-    a, b, a : Int
-    x : Float
-    c : String
-}
-
-
-#+ Asignacion de datos de distinto tipo +#
-#+ a =: x +#

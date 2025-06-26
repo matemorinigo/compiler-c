@@ -37,6 +37,7 @@ int index_condition;
 int aux_index_condition;
 int index_selection;
 int contador_expresiones_reorder;
+int maxima_expresion_detectada_reorder = 0;
 
 char ult_cte_detectada[50];
 char aux_term[50];
@@ -1035,15 +1036,17 @@ reorder: /*El anteultimo cte/id tendria que ser un bool*/
                 fin_ordenamiento = pivote + 1;
             }
             //Crear los tercetos que ordenaran las variables
-            crear_tercetor_ordenamiento(inicio_ordenamiento, fin_ordenamiento, nombre_base_variable_aux, &lista_tercetos);
+            crear_tercetor_ordenamiento(inicio_ordenamiento, fin_ordenamiento, nombre_base_variable_aux, &lista_tercetos, maxima_expresion_detectada_reorder);
 
             // Mostrar resultado
             if(check_var_is_int("interna_expr_0", &symbol_table)){
-                crear_print_tercetos(contador, 0, contador_expresiones_reorder, nombre_base_variable_aux, &lista_tercetos);
+                crear_print_tercetos(contador, 0, contador_expresiones_reorder, nombre_base_variable_aux, &lista_tercetos, maxima_expresion_detectada_reorder);
             }
             else{
-                crear_print_tercetos(contador, 1, contador_expresiones_reorder, nombre_base_variable_aux, &lista_tercetos);
+                crear_print_tercetos(contador, 1, contador_expresiones_reorder, nombre_base_variable_aux, &lista_tercetos, maxima_expresion_detectada_reorder);
             }
+
+            maxima_expresion_detectada_reorder = maxima_expresion_detectada_reorder + contador_expresiones_reorder;
 
             RULE("REORDER -> REORDER PA OPEN_BRACKET expressions_list CLOSE_BRACKET COMA CTE_INT COMA CTE_INT PC");
         }
@@ -1063,7 +1066,7 @@ expressions_list:
 
             contador_expresiones_reorder++;
             sprintf(str_index_expression,"[%d]", $3);
-            sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
+            sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder + maxima_expresion_detectada_reorder);
 
             sprintf(sym.name, "%s", nombre_dinamico_variable);
             
@@ -1105,7 +1108,7 @@ expressions_list:
 
             contador_expresiones_reorder = 0;
             sprintf(str_index_expression,"[%d]", $1);
-            sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder);
+            sprintf(nombre_dinamico_variable, "%s%d", nombre_base_variable_aux, contador_expresiones_reorder + maxima_expresion_detectada_reorder);
 
 
             sprintf(sym.name, "%s", nombre_dinamico_variable);

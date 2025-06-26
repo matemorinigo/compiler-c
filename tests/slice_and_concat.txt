@@ -2,6 +2,6 @@ init {
     c : String
 }
 
+write("Probando Slice And Concat")
 c = sliceAndConcat(3, 6, "amarillo", "verde", 0)
-
 write(c)

@@ -183,6 +183,7 @@ void generarAssembler(tLista* symbol_table, tLista* terceto_lista){
 				break;
 			default:
 				printf("Tipo de terceto no valido: %d\n", tipo_terceto);
+				printf("Terceto: %s %s %s\n", terceto.operador, terceto.op1, terceto.op2);
 				break;
 		}
         
