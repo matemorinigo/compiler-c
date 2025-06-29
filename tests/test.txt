@@ -4,6 +4,8 @@ init {
     j : String
 }
 
+a =: x
+
 #+ SELECCION +#
 
 #+ write("PROBANDO SELECCION:") +#
@@ -43,8 +45,8 @@ init {
 
 #+ SLICE AND CONCAT +#
 
-j = sliceAndConcat(3, 6, "amarillo", "verde", 0)
-write(j)
+#+ j = sliceAndConcat(3, 6, "amarillo", "verde", 0) +#
+#+ write(j) +#
 
 #+ SLICE AND CONCAT +#
 

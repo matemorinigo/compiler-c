@@ -573,6 +573,16 @@ arithmetic_assig:
             sintactic_error("ERROR: Variable usada pero no declarada");
         }
 
+        char var_aux_base[50] = "aux_var_";
+        char nombre_expr_aux[50];
+        sprintf(nombre_expr_aux,"%s%d", var_aux_base, index_expression);
+
+        if(compare_datatypes($1, nombre_expr_aux, &symbol_table) == DIFFERENT_DATATYPE){
+                printf("%s\n", $1);
+                printf("%s\n", nombre_expr_aux);
+                semantic_error("Error: No se puede operar entre variables de diferente tipo");
+        }
+
         tTerceto terceto;
         char str_index_expression[20];
         sprintf(str_index_expression, "[%d]", index_expression);
@@ -600,6 +610,12 @@ expression:
             char str_index_term[20];
             sprintf(str_index_term, "[%d]", index_term);
             sprintf(nombre_term_aux,"%s%d", var_aux_base, index_term);
+
+            if(compare_datatypes(nombre_expr_aux, nombre_term_aux, &symbol_table) == DIFFERENT_DATATYPE){
+                printf("%s\n", nombre_expr_aux);
+                printf("%s\n", nombre_term_aux);
+                semantic_error("Error: No se puede operar entre variables de diferente tipo");
+            }
 
             index_expression = agregar_terceto(terceto, &lista_tercetos, "SUM",str_index_expression, str_index_term);
 
